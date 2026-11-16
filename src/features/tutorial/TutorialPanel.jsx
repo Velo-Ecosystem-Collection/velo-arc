@@ -40,7 +40,7 @@ const UI = {
     },
     sections: {
       soroban: "Get to know Soroban",
-      studio: "Soroban Studio",
+      studio: "Velo Arc",
       structure: "Project Structure",
       contract: "Contract Anatomy",
       variable: "Variables & Types",
@@ -64,7 +64,7 @@ const UI = {
     },
     sections: {
       soroban: "Mengenal Soroban",
-      studio: "Soroban Studio",
+      studio: "Velo Arc",
       structure: "Struktur Proyek",
       contract: "Anatomi Kontrak",
       variable: "Variabel & Tipe",
@@ -88,7 +88,7 @@ const UI = {
     },
     sections: {
       soroban: "Tìm hiểu về Soroban",
-      studio: "Soroban Studio",
+      studio: "Velo Arc",
       structure: "Cấu trúc dự án",
       contract: "Cấu tạo hợp đồng",
       variable: "Biến & Kiểu dữ liệu",
@@ -112,7 +112,7 @@ const UI = {
     },
     sections: {
       soroban: "Alamin ang Soroban",
-      studio: "Soroban Studio",
+      studio: "Velo Arc",
       structure: "Istraktura ng Proyekto",
       contract: "Anatomiya ng Kontrak",
       variable: "Variables & Types",
@@ -172,7 +172,7 @@ const LangSelector = ({ currentLang, onSelect }) => {
 
 const SECTIONS = [
   { id: "soroban", title: "Soroban", category: "basics" },
-  { id: "studio", title: "Soroban Studio", category: "basics" },
+  { id: "studio", title: "Velo Arc", category: "basics" },
   { id: "structure", title: "Project Structure", category: "project" },
   { id: "contract", title: "Contract", category: "contract" },
   { id: "variable", title: "Variabel & Tipe Data", category: "contract" },

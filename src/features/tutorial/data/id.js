@@ -58,12 +58,12 @@ list_angka.push_back(100);`,
     note: "Memilih tipe data yang tepat sangat penting untuk menghemat biaya gas (fee) transaksi di jaringan Stellar.",
   },
   studio: {
-    title: "Soroban Studio: Lingkungan Pengembangan Berbasis Web",
-    intro: "Soroban Studio adalah lingkungan pengembangan terintegrasi (IDE) berbasis cloud yang didesain khusus untuk menyederhanakan alur kerja pengembang Soroban. Platform ini memungkinkan Anda untuk mulai membangun tanpa perlu melakukan konfigurasi lingkungan pengembangan lokal yang kompleks.",
+    title: "Velo Arc: Lingkungan Pengembangan Berbasis Web",
+    intro: "Velo Arc adalah lingkungan pengembangan terintegrasi (IDE) berbasis cloud yang didesain khusus untuk menyederhanakan alur kerja pengembang Soroban. Platform ini memungkinkan Anda untuk mulai membangun tanpa perlu melakukan konfigurasi lingkungan pengembangan lokal yang kompleks.",
     sections: [
       {
-        sub: "Definisi Soroban Studio",
-        text: "Soroban Studio menyediakan berbagai alat pengembangan yang dioptimalkan untuk ekosistem Stellar. Anda dapat menulis kode, mengompilasi kontrak, hingga melakukan simulasi transaksi, semuanya dilakukan langsung melalui peramban (browser) Anda.",
+        sub: "Definisi Velo Arc",
+        text: "Velo Arc menyediakan berbagai alat pengembangan yang dioptimalkan untuk ekosistem Stellar. Anda dapat menulis kode, mengompilasi kontrak, hingga melakukan simulasi transaksi, semuanya dilakukan langsung melalui peramban (browser) Anda.",
       },
       {
         sub: "Fitur Pengembangan Utama",
@@ -72,13 +72,13 @@ list_angka.push_back(100);`,
       },
       {
         sub: "Efisiensi Pengembangan",
-        text: "Setup lingkungan pengembangan Rust dan Soroban seringkali menjadi hambatan bagi pengembang baru. Soroban Studio mengeliminasi hambatan tersebut sehingga Anda dapat langsung fokus pada aspek yang paling krusial: **logika kode kontrak Anda.**",
+        text: "Setup lingkungan pengembangan Rust dan Soroban seringkali menjadi hambatan bagi pengembang baru. Velo Arc mengeliminasi hambatan tersebut sehingga Anda dapat langsung fokus pada aspek yang paling krusial: **logika kode kontrak Anda.**",
       },
     ],
-    note: "Mulailah membangun di ekosistem Stellar dengan efisiensi maksimal melalui Soroban Studio.",
+    note: "Mulailah membangun di ekosistem Stellar dengan efisiensi maksimal melalui Velo Arc.",
     links: [
-      { label: "Halaman Utama Soroban Studio", url: "https://soroban.studio" },
-      { label: "Repositori GitHub", url: "https://github.com/zinct/soroban-ide" },
+      { label: "Repositori Velo Arc", url: "https://github.com/Velo-Ecosystem-Collection/velo-arc" },
+      { label: "Proyek Asli Soroban Studio", url: "https://github.com/zinct/soroban-ide" },
     ],
   },
   contract: {
@@ -108,7 +108,7 @@ list_angka.push_back(100);`,
   },
   structure: {
     title: "Memahami Struktur Projek Soroban",
-    intro: "Memahami struktur folder dan file merupakan langkah fundamental bagi pengembang dalam mengelola projek di Soroban Studio secara efektif.",
+    intro: "Memahami struktur folder dan file merupakan langkah fundamental bagi pengembang dalam mengelola projek di Velo Arc secara efektif.",
     sections: [
       {
         sub: "Direktori Utama",
@@ -153,7 +153,7 @@ list_angka.push_back(100);`,
       {
         sub: "Parameter sebagai Input Pengguna",
         text: "Salah satu fungsi utama parameter dalam fungsi kontrak adalah sebagai pintu masuk data dari pengguna (*user input*):",
-        list: ["**Definisi Input:** Setiap parameter (selain `env`) mewakili input yang harus diberikan oleh pengguna saat memanggil fungsi.", "**Type Safety:** Rust memastikan bahwa data yang dimasukkan oleh pengguna sesuai dengan tipe data yang Anda tentukan (misalnya `u64` untuk angka atau `String` untuk teks), sehingga mencegah error data yang tidak valid.", "**Interface Otomatis:** Di Soroban Studio, parameter-parameter ini akan otomatis muncul sebagai kolom input pada antarmuka interaksi kontrak."],
+        list: ["**Definisi Input:** Setiap parameter (selain `env`) mewakili input yang harus diberikan oleh pengguna saat memanggil fungsi.", "**Type Safety:** Rust memastikan bahwa data yang dimasukkan oleh pengguna sesuai dengan tipe data yang Anda tentukan (misalnya `u64` untuk angka atau `String` untuk teks), sehingga mencegah error data yang tidak valid.", "**Interface Otomatis:** Di Velo Arc, parameter-parameter ini akan otomatis muncul sebagai kolom input pada antarmuka interaksi kontrak."],
       },
       {
         sub: "Anatomi Sintaks Fungsi",

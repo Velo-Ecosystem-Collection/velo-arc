@@ -19,8 +19,8 @@ import { collectProjectFiles } from "../../services/backendService";
 // ─── Commit message config ──────────────────────────────────────
 const COMMIT_MESSAGE_KEY = "soroban:lastCommitMessage";
 const EXISTING_BRANCH_KEY = "soroban:githubExistingTargetBranch";
-const DEFAULT_CREATE_COMMIT = "Initial commit from soroban studio";
-const DEFAULT_UPDATE_COMMIT = "Update from soroban studio";
+const DEFAULT_CREATE_COMMIT = "Initial commit from Velo Arc";
+const DEFAULT_UPDATE_COMMIT = "Update from Velo Arc";
 const COMMIT_SUBJECT_SOFT_LIMIT = 72;
 
 /**

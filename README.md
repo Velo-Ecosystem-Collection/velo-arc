@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/assets/images/soroban.png" alt="Soroban Studio" width="120" />
+<img src="public/assets/images/velo-arc-logo.png" alt="Velo Arc" width="180" />
 
-# Soroban Studio
+# Velo Arc
 
 ### The modern, browser-based IDE for Stellar Soroban smart contracts.
 
@@ -54,9 +54,11 @@ Build, test, and deploy Rust smart contracts on the Stellar network — without 
 
 ## About
 
-**Soroban Studio** is an open-source, VS Code–style IDE designed specifically for developers building on [Stellar](https://stellar.org) with [Soroban](https://developers.stellar.org/docs/build/smart-contracts). It provides a polished in-browser development environment — Monaco editor, project templates, an integrated terminal wired to a Go build service, GitHub clone, [Freighter](https://www.freighter.app/) wallet integration, and a command palette — so you can go from zero to a deployed contract without context-switching between tools.
+**Velo Arc** is an open-source, VS Code–style IDE for developers building on [Stellar](https://stellar.org) with [Soroban](https://developers.stellar.org/docs/build/smart-contracts). It provides a browser-based development environment with the Monaco editor, project templates, an integrated terminal backed by a Go build service, GitHub integration, [Freighter](https://www.freighter.app/) wallet integration, and a command palette.
 
-> **Repository:** [`zinct/soroban-ide`](https://github.com/zinct/soroban-ide)
+> **This repository:** [Velo-Ecosystem-Collection/velo-arc](https://github.com/Velo-Ecosystem-Collection/velo-arc)
+>
+> **Upstream:** Velo Arc is a fork of [Soroban Studio](https://github.com/zinct/soroban-ide), originally created by [Indra Mahesa (`zinct`)](https://github.com/zinct).
 
 ---
 
@@ -107,8 +109,8 @@ Build, test, and deploy Rust smart contracts on the Stellar network — without 
 ## Quick Start
 
 ```bash
-git clone https://github.com/zinct/soroban-ide.git
-cd soroban-ide
+git clone https://github.com/Velo-Ecosystem-Collection/velo-arc.git
+cd velo-arc
 npm install
 cp .env.example .env     # fill in the values you need
 npm run dev              # http://localhost:3000
@@ -122,6 +124,7 @@ Vite proxies `/api` → `http://localhost:8080` in dev (see `vite.config.js`), s
 | ----------------- | ------------------------------------------------- |
 | `npm run dev`     | Start the Vite dev server on port `3000`.         |
 | `npm run build`   | Produce a production build in `dist/`.            |
+| `npm test`        | Run the Node.js test suite.                       |
 | `npm run preview` | Serve the built `dist/` locally for a smoke test. |
 
 ---
@@ -133,7 +136,7 @@ Copy `.env.example` to `.env` and fill in:
 | Variable                | Scope         | Description                                                                 |
 | ----------------------- | ------------- | --------------------------------------------------------------------------- |
 | `VITE_GITHUB_CLIENT_ID` | Client (Vite) | GitHub OAuth App client ID. Used by the GitHub panel for sign-in and clone. |
-| `VITE_API_BASE`         | Client (Vite) | Backend URL. Leave empty locally (defaults to `/api`, proxied by Vite). In production set to e.g. `https://api.soroban.studio`. |
+| `VITE_API_BASE`         | Client (Vite) | Backend URL. Leave empty locally (defaults to `/api`, proxied by Vite). Set it to your deployed Velo Arc API URL when hosted separately. |
 | `BACKEND_URL`           | Server-side   | Upstream backend URL for serverless proxies (optional).                     |
 
 > Only variables prefixed with `VITE_` are exposed to the browser bundle.
@@ -157,7 +160,7 @@ Copy `.env.example` to `.env` and fill in:
 ## Architecture
 
 ```text
-soroban-ide/
+velo-arc/
 ├── public/                 # Static assets (logos, icons, codicons)
 ├── src/
 │   ├── app/                # Router (HashRouter)
@@ -182,13 +185,13 @@ soroban-ide/
 └── package.json
 ```
 
-The Go backend lives in a separate repository and is consumed by the client at `/api` (WebSocket streaming for builds, REST for file and template operations).
+The companion [Velo Arc Go backend](https://github.com/Velo-Ecosystem-Collection/velo-arc-backend) lives in a separate repository and is consumed by the client at `/api` (WebSocket streaming for builds, REST for file and template operations).
 
 ---
 
 ## Contributing
 
-Contributions are very welcome — bug reports, feature requests, and pull requests all help make the tooling around Soroban better for everyone.
+Contributions are very welcome — bug reports, feature requests, and pull requests all help improve Velo Arc and Soroban developer tooling.
 
 Before opening a PR:
 
@@ -201,12 +204,14 @@ Before opening a PR:
 
 ## Acknowledgements
 
-Built with love for the [Stellar](https://stellar.org) developer community, and standing on the shoulders of open-source giants:
+Velo Arc is a fork of [Soroban Studio](https://github.com/zinct/soroban-ide), originally created by [Indra Mahesa (`zinct`)](https://github.com/zinct). We thank Indra for creating the project this work builds on.
+
+Built for the [Stellar](https://stellar.org) developer community with help from these open-source projects:
 
 - [Stellar Development Foundation](https://stellar.org) — for Stellar and Soroban.
 - [Monaco Editor](https://microsoft.github.io/monaco-editor/) — the editor that powers VS Code.
 - [Vite](https://vitejs.dev/) · [React](https://react.dev/) · [Lucide](https://lucide.dev/) · [Freighter](https://www.freighter.app/).
 
 <div align="center">
-<sub>Made for the Stellar ecosystem · <a href="https://github.com/zinct/soroban-ide">zinct/soroban-ide</a></sub>
+<sub>Made for the Stellar ecosystem · <a href="https://github.com/Velo-Ecosystem-Collection/velo-arc">Velo Arc</a> · Fork of <a href="https://github.com/zinct/soroban-ide">Soroban Studio</a></sub>
 </div>

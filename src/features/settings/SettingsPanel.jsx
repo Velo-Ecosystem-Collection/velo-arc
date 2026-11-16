@@ -119,7 +119,7 @@ const SettingsPanel = ({ currentTheme, onThemeChange, onClose }) => {
 
         <div className="settings-header">
           <h2>Settings</h2>
-          <p>Configure Soroban Studio to match your workflow.</p>
+          <p>Configure Velo Arc to match your workflow.</p>
         </div>
 
         {activeTab === "appearance" && renderAppearance()}

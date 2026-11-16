@@ -597,7 +597,7 @@ const Sidebar = memo(({ tree, expandedFolders, onToggleFolder, onFileSelect, onN
         }, 500);
       } else {
         // Handle internal move to root
-        const draggedId = e.dataTransfer.getData("application/soroban-studio-node-id") || dragState?.draggingId;
+        const draggedId = e.dataTransfer.getData("application/velo-arc-node-id") || dragState?.draggingId;
         if (draggedId && draggedId !== targetFolder) {
           handleMoveItem(draggedId, targetFolder);
         }

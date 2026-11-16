@@ -76,7 +76,7 @@ const ExplorerNode = memo(({ node, depth, tree, expandedFolders, onToggleFolder,
   const handleDragStart = useCallback(
     (e) => {
       // Set the data for internal move
-      e.dataTransfer.setData("application/soroban-studio-node-id", node.id);
+      e.dataTransfer.setData("application/velo-arc-node-id", node.id);
       e.dataTransfer.effectAllowed = "move";
       
       // Update global drag state
@@ -180,7 +180,7 @@ const ExplorerNode = memo(({ node, depth, tree, expandedFolders, onToggleFolder,
         }
       } else {
         // Handle internal move
-        const draggedId = e.dataTransfer.getData("application/soroban-studio-node-id") || dragState?.draggingId;
+        const draggedId = e.dataTransfer.getData("application/velo-arc-node-id") || dragState?.draggingId;
         const finalTargetId = targetFolderId;
         
         if (draggedId && draggedId !== finalTargetId) {

@@ -1,5 +1,5 @@
 /**
- * Backend integration service for Soroban Studio.
+ * Backend integration service for Velo Arc.
  *
  * Handles communication with the Go backend at /api (proxied in dev).
  * - POST /api/run    → submit project files + command for execution

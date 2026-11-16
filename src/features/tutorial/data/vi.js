@@ -33,11 +33,11 @@ export const vi = {
     note: "Chọn đúng kiểu dữ liệu là rất quan trọng để tiết kiệm phí gas trên mạng Stellar.",
   },
   studio: {
-    title: "Soroban Studio: IDE trực tuyến",
-    intro: "Soroban Studio là một IDE dựa trên đám mây được thiết kế để đơn giản hóa quy trình phát triển của bạn. Bắt đầu xây dựng mà không cần thiết lập môi trường cục bộ phức tạp.",
+    title: "Velo Arc: IDE trực tuyến",
+    intro: "Velo Arc là một IDE dựa trên đám mây được thiết kế để đơn giản hóa quy trình phát triển của bạn. Bắt đầu xây dựng mà không cần thiết lập môi trường cục bộ phức tạp.",
     sections: [
       {
-        sub: "Soroban Studio là gì?",
+        sub: "Velo Arc là gì?",
         text: "Chúng tôi cung cấp các công cụ tối ưu cho hệ sinh thái Stellar. Viết mã, biên dịch hợp đồng và mô phỏng giao dịch—tất cả trực tiếp trong trình duyệt của bạn.",
       },
       {
@@ -46,7 +46,7 @@ export const vi = {
         list: ["**Trình soạn thảo mã nâng cao:** Nhẹ nhưng mạnh mẽ với chức năng tự động hoàn thành Rust.", "**Terminal tích hợp:** Truy cập trực tiếp vào các lệnh `stellar` và `cargo`.", "**Triển khai một lần nhấp:** Dễ dàng triển khai lên Testnet.", "**Tích hợp GitHub:** Đồng bộ hóa mã nguồn của bạn thông qua GitHub."],
       },
     ],
-    note: "Xây dựng trên Stellar với hiệu quả tối đa thông qua Soroban Studio.",
+    note: "Xây dựng trên Stellar với hiệu quả tối đa thông qua Velo Arc.",
   },
   contract: {
     title: "Cấu trúc hợp đồng thông minh Soroban",

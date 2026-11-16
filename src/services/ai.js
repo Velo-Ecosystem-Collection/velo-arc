@@ -47,7 +47,7 @@ export const chatWithAI = async (messages, modelIndex = 0) => {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "HTTP-Referer": window.location.href, // Required by OpenRouter
-        "X-Title": "Soroban Studio", // Optional but good practice
+        "X-Title": "Velo Arc", // Optional but good practice
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -97,7 +97,7 @@ export const streamChatWithAI = async (messages, onUpdate, modelIndex = 0) => {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "HTTP-Referer": window.location.href,
-        "X-Title": "Soroban Studio",
+        "X-Title": "Velo Arc",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

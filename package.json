@@ -1,11 +1,12 @@
 {
-  "name": "soroban-studio",
+  "name": "velo-arc",
   "version": "1.0.0",
-  "description": "Soroban Studio - VS Code Clone",
+  "description": "Velo Arc - browser-based IDE for Stellar Soroban development",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node --test",
     "preview": "vite preview"
   },
   "engines": {

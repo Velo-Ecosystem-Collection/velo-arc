@@ -325,7 +325,7 @@ const formatGithubError = (data, defaultMsg) => {
 /**
  * Push all workspace files to a GitHub repo using the Git Trees API.
  */
-export const pushFilesToRepo = async (token, owner, repo, files, message = "Push from soroban studio | https://soroban.studio", onProgress, branch = "main", force = false) => {
+export const pushFilesToRepo = async (token, owner, repo, files, message = "Push from Velo Arc", onProgress, branch = "main", force = false) => {
   const headers = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",

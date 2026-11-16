@@ -58,11 +58,11 @@ list.push_back(100);`,
     note: "Choosing the right data type is crucial for saving transaction gas fees on the Stellar network.",
   },
   studio: {
-    title: "Soroban Studio: Web-Based IDE",
-    intro: "Soroban Studio is a cloud-based IDE designed to simplify your development workflow. Start building without complex local environment setups.",
+    title: "Velo Arc: Web-Based IDE",
+    intro: "Velo Arc is a cloud-based IDE designed to simplify your development workflow. Start building without complex local environment setups.",
     sections: [
       {
-        sub: "What is Soroban Studio?",
+        sub: "What is Velo Arc?",
         text: "We provide optimized tools for the Stellar ecosystem. Write code, compile contracts, and simulate transactions—all directly in your browser.",
       },
       {
@@ -72,13 +72,13 @@ list.push_back(100);`,
       },
       {
         sub: "Development Efficiency",
-        text: "Setting up Rust can be a hurdle. Soroban Studio eliminates this so you can focus on what matters: **your contract logic.**",
+        text: "Setting up Rust can be a hurdle. Velo Arc eliminates this so you can focus on what matters: **your contract logic.**",
       },
     ],
-    note: "Build on Stellar with maximum efficiency through Soroban Studio.",
+    note: "Build on Stellar with maximum efficiency through Velo Arc.",
     links: [
-      { label: "Soroban Studio Home", url: "https://soroban.studio" },
-      { label: "GitHub Repository", url: "https://github.com/zinct/soroban-ide" },
+      { label: "Velo Arc Repository", url: "https://github.com/Velo-Ecosystem-Collection/velo-arc" },
+      { label: "Original Soroban Studio Project", url: "https://github.com/zinct/soroban-ide" },
     ],
   },
   contract: {
@@ -108,7 +108,7 @@ list.push_back(100);`,
   },
   structure: {
     title: "Understanding Soroban Project Structure",
-    intro: "Knowing your folders and files is fundamental to effectively managing your projects in Soroban Studio.",
+    intro: "Knowing your folders and files is fundamental to effectively managing your projects in Velo Arc.",
     sections: [
       {
         sub: "Main Directories",
@@ -153,7 +153,7 @@ list.push_back(100);`,
       {
         sub: "Parameters as User Input",
         text: "Parameters are the entry point for data provided by the user:",
-        list: ["**Input Definition:** Each parameter (besides `env`) represents data the user must provide.", "**Type Safety:** Rust ensures inputs match your defined types (e.g., `u64` for numbers), preventing invalid data errors.", "**Auto Interface:** In Soroban Studio, these parameters automatically appear as input fields in the interaction UI."],
+        list: ["**Input Definition:** Each parameter (besides `env`) represents data the user must provide.", "**Type Safety:** Rust ensures inputs match your defined types (e.g., `u64` for numbers), preventing invalid data errors.", "**Auto Interface:** In Velo Arc, these parameters automatically appear as input fields in the interaction UI."],
       },
       {
         sub: "Function Syntax Anatomy",

@@ -20,7 +20,7 @@ const Terminal = memo(({ activeFileName, currentDirectory = "~/project", treeDat
   const [history, setHistory] = useState(
     () =>
       persistedState?.history || [
-        { type: "output", content: "Welcome to Soroban Studio Terminal" },
+        { type: "output", content: "Welcome to Velo Arc Terminal" },
         { type: "output", content: "Type 'help' for available commands" },
       ],
   );

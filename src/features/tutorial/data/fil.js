@@ -33,11 +33,11 @@ export const fil = {
     note: "Mahalaga ang pagpili ng tamang data type para makatipid sa gas fees sa Stellar network.",
   },
   studio: {
-    title: "Soroban Studio: Web-Based IDE",
-    intro: "Ang Soroban Studio ay isang cloud-based IDE na idinisenyo para padaliin ang iyong development workflow. Magsimulang bumuo nang walang kumplikadong local setup.",
+    title: "Velo Arc: Web-Based IDE",
+    intro: "Ang Velo Arc ay isang cloud-based IDE na idinisenyo para padaliin ang iyong development workflow. Magsimulang bumuo nang walang kumplikadong local setup.",
     sections: [
       {
-        sub: "Ano ang Soroban Studio?",
+        sub: "Ano ang Velo Arc?",
         text: "Nagbibigay kami ng mga optimized tools para sa Stellar ecosystem. Sumulat ng code, i-compile ang mga contract, at i-simulate ang mga transaction direktang sa iyong browser.",
       },
       {
@@ -46,7 +46,7 @@ export const fil = {
         list: ["**Advanced Code Editor:** Magaan ngunit makapangyarihan na may Rust autocomplete.", "**Integrated Terminal:** Direktang access sa mga command ng `stellar` at `cargo`.", "**One-Click Deployment:** Madaling i-deploy sa Testnet.", "**GitHub Integration:** I-sync ang iyong source code sa pamamagitan ng GitHub."],
       },
     ],
-    note: "Bumuo sa Stellar nang may maximum efficiency sa pamamagitan ng Soroban Studio.",
+    note: "Bumuo sa Stellar nang may maximum efficiency sa pamamagitan ng Velo Arc.",
   },
   contract: {
     title: "Anatomiya ng Soroban Smart Contract",
