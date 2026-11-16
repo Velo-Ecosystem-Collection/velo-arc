@@ -1,0 +1,226 @@
+/* ─── Design Tokens ─── */
+
+:root {
+  /* Default: Pure Monochromatic Theme (Dark Grey based) */
+  --main-bg: #151517;
+  --sidebar-bg: #0d0d0f;
+  --explorer-bg: #0d0d0f;
+  --tab-bg: #1a1a1c;
+  --active-tab-bg: #151517;
+  --border-color: #222225;
+  --text-primary: #f4f4f5;
+  --text-secondary: #d4d4d8;
+  --text-muted: #71717a;
+  --hover-bg: #1e1e21;
+  --active-bg: #27272a;
+  --accent: #ffffff;
+  --accent-hover: #e4e4e7;
+  --accent-contrast: #000000;
+  --status-bar-bg: #0d0d0f;
+  --status-bar-text: #71717a;
+  --error: #ffffff;
+  --warning: #a1a1aa;
+  --info: #71717a;
+  --success: #e4e4e7;
+  --main-bg-rgb: 21, 21, 23;
+
+  /* Editor Colors - Slightly lighter than explorer */
+  --editor-bg: #151517;
+  --editor-fg: #f4f4f5;
+  --editor-line-highlight: #1e1e21;
+  --editor-selection: #3f3f46;
+  
+  /* Terminal Tokens - Colored Prompt */
+  --term-bg: #151517;
+  --term-win-bg: #101012;
+  --term-fg: #f4f4f5;
+  --term-user: #4fc1ff;
+  --term-path: #c3e88d;
+  --term-symbol: #ff5370;
+  --term-accent: #89ddff;
+  --term-error: #ffffff;
+  --term-info: #a1a1aa;
+  --term-muted: #52525b;
+
+  /* Sidebar resize */
+  --sidebar-resize-handle: #27272a;
+
+  /* UI Dimensions */
+  --header-height: 60px;
+
+  /* Font Sizes */
+  --font-size-xs: 13px;
+  --font-size-sm: 14px;
+  --font-size-base: 15px;
+}
+
+[data-theme="dark"] {
+  /* Mirror :root for Community Dark to ensure consistency */
+  --main-bg: #151517;
+  --sidebar-bg: #0d0d0f;
+  --explorer-bg: #0d0d0f;
+  --tab-bg: #1a1a1c;
+  --active-tab-bg: #151517;
+  --border-color: #222225;
+  --text-primary: #f4f4f5;
+  --text-secondary: #d4d4d8;
+  --text-muted: #71717a;
+  --hover-bg: #1e1e21;
+  --active-bg: #27272a;
+  --accent: #ffffff;
+  --accent-hover: #e4e4e7;
+  --status-bar-bg: #0d0d0f;
+  --status-bar-text: #71717a;
+  --error: #ffffff;
+  --warning: #a1a1aa;
+  --info: #71717a;
+  --success: #e4e4e7;
+
+  --editor-bg: #151517;
+  --editor-fg: #f4f4f5;
+  --editor-line-highlight: #1e1e21;
+  --editor-selection: #3f3f46;
+  
+  --term-bg: #151517;
+  --term-win-bg: #101012;
+  --term-fg: #f4f4f5;
+  --term-user: #4fc1ff;
+  --term-path: #c3e88d;
+  --term-symbol: #ff5370;
+  --term-accent: #89ddff;
+  --term-error: #ffffff;
+  --term-info: #a1a1aa;
+  --term-muted: #52525b;
+
+  --sidebar-resize-handle: #27272a;
+}
+
+[data-theme="light"] {
+  --main-bg: #ffffff;
+  --sidebar-bg: #f8f9fa;
+  --explorer-bg: #ffffff;
+  --tab-bg: #f3f3f3;
+  --active-tab-bg: #ffffff;
+  --border-color: #e1e4e8;
+  --text-primary: #111111;
+  --text-secondary: #24292e;
+  --text-muted: #6a737d;
+  --hover-bg: #f0f2f5;
+  --active-bg: #e2e8f0;
+  --accent: #27272a;
+  --accent-hover: #3f3f46;
+  --accent-contrast: #ffffff;
+  --status-bar-bg: #f8f9fa;
+  --status-bar-text: #24292e;
+  
+  --editor-bg: #ffffff;
+  --editor-fg: #111111;
+  --editor-line-highlight: #f0f0f0;
+  --editor-selection: #e1e4e8;
+  
+  /* Terminal Tokens - Monochromatic Light */
+  --term-bg: #ffffff;
+  --term-win-bg: #ffffff;
+  --term-fg: #1a1a1a;
+  --term-user: #000000;
+  --term-path: #4a4a4a;
+  --term-symbol: #000000;
+  --term-accent: #333333;
+  --term-error: #000000;
+  --term-info: #6a737d;
+  --term-muted: #959da5;
+  
+  --sidebar-resize-handle: #e1e4e8;
+  --main-bg-rgb: 255, 255, 255;
+}
+
+
+
+/* ─── Reset ─── */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--main-bg);
+  color: var(--text-primary);
+  font-family: "Inter", "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, Monaco, monospace;
+  font-size: var(--font-size-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+/* ─── Scrollbar - Monochrome ─── */
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ─── Layout Components ─── */
+
+.workspace-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--tab-bg);
+  overflow: visible;
+  min-width: 0; /* Prevent header from expanding beyond parent */
+  width: 100%;
+}
+
+.welcome-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--editor-bg);
+  opacity: 0.6;
+}
+
+.welcome-logo {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 24px;
+}
+
+.welcome-message {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.editor-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-bg);
+  padding-top: 12px;
+  padding-bottom: 56px; /* Space for floating terminal header */
+  overflow: hidden;
+}

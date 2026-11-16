@@ -1,0 +1,124 @@
+/* ─── Tab Bar ─── */
+
+.tabs-bar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch; /* Full height tabs */
+  height: 100%;
+  background: var(--tab-bg);
+  padding-left: 0;
+  gap: 0;
+  overflow-x: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+}
+
+.tabs-bar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 16px;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  background: transparent;
+  max-width: 200px;
+  min-width: 100px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  margin-right: -1px; /* Overlap borders for seamless connection */
+  outline: none;
+}
+
+.tab:hover {
+  background: var(--hover-bg);
+}
+
+.tab:focus,
+.tab:active {
+  outline: none;
+  border-bottom: none;
+}
+
+.tab.active {
+  background: var(--active-tab-bg);
+  border: none;
+  border-top: 4px solid var(--accent);
+  color: var(--text-primary);
+  z-index: 10;
+  outline: none;
+  transition: none;
+  position: relative;
+  height: 100%;
+}
+
+/* Remove the pseudo-element mask in favor of box-shadow which is more precise across zoom levels */
+.tab.active::after {
+  display: none;
+}
+
+.tab-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-label.preview-label {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.tab-close {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 18px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
+}
+
+.tab:hover .tab-close {
+  opacity: 1;
+}
+
+.tab.active .tab-close {
+  opacity: 0.6;
+}
+
+.tab.active:hover .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  background: transparent;
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.tabs-empty {
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.tabs-placeholder {
+  font-size: var(--font-size-sm);
+}

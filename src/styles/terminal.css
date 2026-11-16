@@ -1,0 +1,302 @@
+/* ─── Terminal Panel ─── */
+
+.terminal {
+  height: 120px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.terminal.animate {
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.terminal.collapsed {
+  height: 56px; /* MIN_HEIGHT sync with JS and header height */
+  flex: 0 0 auto;
+  background: transparent;
+  border-top: none;
+  pointer-events: none;
+}
+
+.terminal.collapsed .terminal-header {
+  border-bottom: none;
+}
+
+.terminal.collapsed .terminal-title-btn {
+  background: transparent;
+}
+
+.terminal.collapsed .terminal-resize-handle {
+  display: none;
+}
+
+.terminal.maximized {
+  min-height: 0;
+  flex: 1;
+}
+
+/* ─── Resize Handle ─── */
+
+.terminal-resize-handle {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: row-resize;
+  z-index: 100;
+  transition: background 0.2s;
+}
+
+.terminal-resize-handle:hover,
+.terminal-resize-handle.dragging {
+  background: var(--accent);
+}
+
+/* ─── Header ─── */
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0; /* Allow tabs to touch edges */
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border-color);
+  pointer-events: auto;
+  
+  /* Glassmorphism */
+  background: rgba(var(--main-bg-rgb), 0.45);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  z-index: 10;
+}
+
+.terminal-title-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-right: 1px solid var(--border-color);
+  color: inherit;
+  cursor: pointer;
+  padding: 0 24px;
+  height: 100%;
+  margin: 0;
+  border-radius: 0; /* Integrated full-width style */
+  transition: all 0.2s ease;
+  z-index: 2;
+  position: relative;
+  flex: 1; /* Make it fill the header */
+  justify-content: flex-start;
+}
+
+.terminal-title-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px; /* Thinner border */
+  background: var(--text-muted); /* Grayish color */
+  opacity: 0.8;
+}
+
+.terminal-title-btn:hover {
+  background: var(--hover-bg);
+}
+
+.terminal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.terminal-running-badge {
+  font-size: 11px;
+  color: var(--term-path);
+  animation: terminal-pulse 1.5s ease-in-out infinite;
+}
+
+/* ─── Window ─── */
+
+.terminal-window {
+  flex: 1;
+  padding: 8px 12px;
+  font-family: "JetBrains Mono", "Fira Code", "SF Mono", Monaco, Consolas, monospace;
+  font-size: 16px;
+  overflow-y: auto;
+  background: var(--term-win-bg);
+  color: var(--term-fg);
+  overscroll-behavior: none;
+  user-select: text; /* Ensure text can be selected and copied */
+}
+
+.terminal.collapsed .terminal-window {
+  display: none;
+}
+
+.terminal-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.terminal-line {
+  margin: 2px 0;
+  line-height: 1.4;
+}
+
+.terminal-line.command {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* ─── Prompt ─── */
+
+.terminal-prompt-line {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-prompt-user {
+  color: var(--term-user);
+  font-weight: 500;
+}
+.terminal-prompt-at {
+  color: var(--term-fg);
+}
+.terminal-prompt-host {
+  color: var(--term-accent);
+}
+.terminal-prompt-separator {
+  color: var(--term-fg);
+}
+.terminal-prompt-path {
+  color: var(--term-path);
+  font-weight: 500;
+}
+.terminal-prompt-symbol {
+  color: var(--term-symbol);
+  margin: 0 6px;
+}
+.terminal-prompt-command {
+  color: var(--term-fg);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-output {
+  margin: 4px 0 8px 0;
+  padding-left: 0;
+  color: var(--term-fg);
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: inherit;
+  font-size: inherit;
+  user-select: text; /* Allow copying outputs */
+}
+
+/* ─── Input ─── */
+
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  padding-bottom: 8px;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--term-fg);
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  margin: 0 0 0 6px;
+  min-width: 50px;
+  caret-color: var(--term-user);
+}
+
+.terminal-input::placeholder {
+  color: var(--term-muted);
+}
+
+/* ─── Backend Integration Styles ─── */
+
+.terminal-error .terminal-output {
+  color: var(--term-error);
+}
+
+.terminal-info .terminal-output {
+  color: var(--term-info);
+}
+
+.terminal-running-badge {
+  font-size: 11px;
+  color: var(--term-path);
+  animation: terminal-pulse 1.5s ease-in-out infinite;
+  margin-left: 8px;
+}
+
+@keyframes terminal-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.terminal-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Links ─── */
+
+.terminal-link {
+  color: var(--term-user);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.terminal-link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Compiling Animation ─── */
+
+.terminal-compiling-line {
+  color: var(--term-fg);
+  font-family: inherit;
+  font-size: inherit;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-dots::after {
+  content: "...";
+  display: inline-block;
+  width: 20px;
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ""; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
+}

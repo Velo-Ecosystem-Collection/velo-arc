@@ -1,0 +1,732 @@
+/* ─── Sidebar Wrapper ─── */
+
+.sidebar-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  position: relative;
+  z-index: 500;
+}
+
+.sidebar {
+  width: 280px;
+  min-width: 48px; /* Set to 48px to allow smooth transition from collapsed state */
+  max-width: 1200px;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: row; /* Changed to horizontal */
+  border-right: 1px solid var(--border-color);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother, more premium transition */
+  overflow: visible; /* Changed from hidden to allow header to overflow */
+  position: relative;
+  z-index: 100;
+}
+
+.sidebar.resizing {
+  transition: none;
+}
+
+.sidebar.collapsed {
+  width: 48px !important;
+  min-width: 48px !important;
+}
+
+.sidebar-activity-bar {
+  width: 48px;
+  min-width: 48px;
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+  background: var(--sidebar-bg);
+  z-index: 2;
+}
+
+.activity-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.activity-btn:hover {
+  color: var(--text-primary);
+}
+
+.activity-btn.active {
+  color: var(--accent);
+  background: var(--active-bg);
+}
+
+.activity-btn.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--accent);
+}
+
+.sidebar-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; 
+  overflow: visible; /* Changed from hidden to allow header to overflow */
+  transition: 
+    opacity 0.3s ease 0.1s,
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sidebar.collapsed .sidebar-panel {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+  transition: 
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.sidebar-panel.hidden {
+  display: none;
+}
+
+.sidebar-children-content.empty-folder-drop-zone {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-collapsed-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.sidebar-collapsed-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* ─── Resize Handle ─── */
+
+.sidebar-resize-handle {
+  width: 4px;
+  background: transparent;
+  cursor: col-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: background 0.2s;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle.dragging {
+  background: var(--sidebar-resize-handle);
+}
+
+.sidebar-minimize-btn {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 48px;
+  background: var(--border-color);
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 101;
+  border-radius: 0 4px 4px 0;
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
+}
+
+.sidebar-wrapper:hover .sidebar-minimize-btn {
+  opacity: 1;
+}
+
+.sidebar-minimize-btn:hover {
+  background: var(--active-bg);
+}
+
+.sidebar-minimize-btn svg {
+  width: 10px;
+  height: 10px;
+  color: var(--text-primary);
+}
+
+/* ─── Header ─── */
+
+.sidebar-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--sidebar-bg);
+  overflow: visible;
+  white-space: nowrap;
+  position: relative;
+  z-index: 501;
+}
+
+.sidebar-title {
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 4px;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.sidebar-action {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  font-size: 18px;
+  line-height: 32px;
+}
+
+.sidebar-action:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* ─── Workspace Root Node ─── */
+
+.sidebar-root-node {
+  background: var(--hover-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  height: 32px !important;
+  margin-bottom: 4px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.sidebar-root-node:hover {
+  background: var(--active-bg) !important;
+}
+
+.root-label {
+  font-weight: 700 !important;
+  letter-spacing: 0.05em;
+  font-size: 11px !important;
+  color: var(--text-primary) !important;
+}
+
+.sidebar-root-chevron {
+  margin-left: auto;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.sidebar-root-node svg {
+  color: var(--text-primary) !important;
+}
+
+/* ─── Body ─── */
+
+.sidebar-body {
+  flex: 1;
+  background: var(--explorer-bg);
+  padding-top: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+.sidebar-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ─── Inline Input ─── */
+
+.sidebar-inline-input {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+}
+
+.sidebar-inline-input-field {
+  flex: 1;
+  background: var(--active-bg);
+  border: 1px solid var(--text-primary);
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  outline: none;
+  min-width: 0;
+}
+
+.sidebar-inline-input-field:focus {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--text-primary);
+}
+
+/* ─── Tree Nodes ─── */
+
+.sidebar-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-folder,
+.sidebar-file {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 1px;
+  font-size: 17px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+  transition: background 0.12s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative; /* Added to fix absolute chevron positioning */
+}
+
+.sidebar-folder:hover,
+.sidebar-file:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.sidebar-folder.selected {
+  background: var(--active-bg);
+  color: var(--text-primary);
+}
+
+.sidebar-folder.drag-over {
+  background: var(--active-bg);
+  border: 1px dashed var(--text-primary);
+}
+
+.sidebar-file.active {
+  background: var(--active-bg);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.sidebar-file.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--text-primary);
+}
+
+.sidebar-file.dragging,
+.sidebar-folder.dragging {
+  opacity: 0.5;
+}
+
+.sidebar-file.cut,
+.sidebar-folder.cut {
+  opacity: 0.4;
+}
+
+.sidebar-node-label.cut-label {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.sidebar-chevron {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.sidebar-node-icon {
+  min-width: 22px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+
+.sidebar-node-icon svg,
+.sidebar-node-icon img {
+  display: block;
+}
+
+.soroban-docs-icon {
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.soroban-docs-icon:hover {
+  opacity: 0.9;
+}
+
+[data-theme="light"] .soroban-docs-icon {
+  filter: brightness(0); /* Force to black */
+}
+
+[data-theme="dark"] .soroban-docs-icon,
+[data-theme="midnight"] .soroban-docs-icon {
+  filter: brightness(0) invert(1); /* Force to white */
+}
+
+.sidebar-node-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-children {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── External Drop Zone ─── */
+
+.sidebar-body.drag-over-external {
+  border: 2px dashed var(--accent);
+  position: relative;
+}
+
+/* ─── Upload Progress ─── */
+
+.upload-progress-bar.folder-progress {
+  position: relative;
+  height: 24px;
+  background: transparent;
+  border: none;
+  padding: 0 8px;
+  margin: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-progress-bar.folder-progress .upload-progress-fill {
+  height: 4px;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  min-width: 10px;
+  flex: 1;
+}
+
+.upload-progress-bar.folder-progress .upload-progress-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ─── Rename Error Dialog ─── */
+
+.rename-error-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.rename-error-dialog {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 16px;
+  min-width: 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rename-error-message {
+  margin: 0 0 12px 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.rename-error-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.rename-error-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  background: var(--accent);
+  color: var(--main-bg);
+  border-color: transparent;
+  transition: background 0.1s;
+}
+
+.rename-error-btn:hover {
+  background: var(--accent-hover);
+}
+
+.drag-status-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: var(--accent);
+  color: var(--main-bg);
+  padding: 8px 16px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.2s ease;
+}
+
+.drag-status-indicator svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ─── Lazy Folder ─── */
+
+.lazy-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--text-muted);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: lazySpin 0.6s linear infinite;
+}
+
+@keyframes lazySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lazy-badge {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  letter-spacing: 2px;
+}
+
+.sidebar-folder.lazy-folder,
+.sidebar-folder.lazy-folder.selected,
+.sidebar-folder.lazy-folder:hover,
+.sidebar-folder.lazy-folder.active {
+  color: var(--text-muted);
+  opacity: 0.5 !important;
+}
+
+/* Children of lazy folders should also have reduced opacity */
+.sidebar-folder.lazy-folder .sidebar-folder,
+.sidebar-folder.lazy-folder .sidebar-file {
+  opacity: 0.6 !important;
+}
+
+.sidebar-folder.lazy-folder .sidebar-folder:hover,
+.sidebar-folder.lazy-folder .sidebar-file:hover {
+  opacity: 0.8 !important;
+}
+
+/* More specific rules for children of lazy folders */
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file {
+  opacity: 0.6 !important;
+  color: var(--text-muted) !important;
+}
+
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder:hover,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file:hover {
+  opacity: 0.8 !important;
+}
+
+/* Children states - selected, active, etc */
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder.selected,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder.active,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file.active {
+  opacity: 0.6 !important;
+  color: var(--text-muted) !important;
+}
+
+/* Nuclear option for children */
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder.selected,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-folder.active,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file.active {
+  opacity: 0.6 !important;
+  color: var(--text-muted) !important;
+}
+
+/* Files inside lazy folders - all states */
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file:hover,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file.active,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder .sidebar-file.selected {
+  opacity: 0.6 !important;
+  color: var(--text-muted) !important;
+}
+
+/* Ensure lazy folder opacity overrides all other states */
+.sidebar-body .sidebar-folder.lazy-folder.selected,
+.sidebar-body .sidebar-folder.lazy-folder.selected:hover,
+.sidebar-body .sidebar-folder.lazy-folder.active,
+.sidebar-body .sidebar-folder.lazy-folder.active:hover {
+  color: var(--text-muted) !important;
+  opacity: 0.5 !important;
+  background: var(--explorer-bg) !important;
+}
+
+/* Override background for selected lazy folders */
+.sidebar-body .sidebar-folder.lazy-folder.selected {
+  background: transparent !important;
+}
+
+/* Override text color for all lazy folder states */
+.sidebar-body .sidebar-folder.lazy-folder,
+.sidebar-body .sidebar-folder.lazy-folder:hover,
+.sidebar-body .sidebar-folder.lazy-folder.selected,
+.sidebar-body .sidebar-folder.lazy-folder.active {
+  color: var(--text-muted) !important;
+}
+
+/* MOST SPECIFIC: Force lazy folder to stay dim in ALL states */
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder:hover,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder.selected,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder.active,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder.selected:hover,
+.sidebar-wrapper .sidebar-body .sidebar-node .sidebar-folder.lazy-folder.active:hover {
+  color: var(--text-muted) !important;
+  opacity: 0.5 !important;
+  background: transparent !important;
+}
+
+/* Force override for button element specifically */
+.sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder,
+.sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder:hover,
+.sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder.selected,
+.sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder.active {
+  color: var(--text-muted) !important;
+  opacity: 0.5 !important;
+  background: transparent !important;
+}
+
+/* ULTIMATE OVERRIDE: Use attribute selector for maximum specificity */
+.sidebar-wrapper .sidebar-body .sidebar-node button[class*="lazy-folder"],
+.sidebar-wrapper .sidebar-body .sidebar-node button[class*="lazy-folder"]:hover,
+.sidebar-wrapper .sidebar-body .sidebar-node button[class*="lazy-folder"]:focus,
+.sidebar-wrapper .sidebar-body .sidebar-node button[class*="lazy-folder"]:active {
+  color: var(--text-muted) !important;
+  opacity: 0.5 !important;
+  background: transparent !important;
+}
+
+/* FINAL ATTEMPT: Direct element override */
+div.sidebar-wrapper div.sidebar-body div.sidebar-node button.sidebar-folder.lazy-folder,
+div.sidebar-wrapper div.sidebar-body div.sidebar-node button.sidebar-folder.lazy-folder:hover,
+div.sidebar-wrapper div.sidebar-body div.sidebar-node button.sidebar-folder.lazy-folder.selected,
+div.sidebar-wrapper div.sidebar-body div.sidebar-node button.sidebar-folder.lazy-folder.active {
+  color: var(--text-muted) !important;
+  opacity: 0.5 !important;
+  background: transparent !important;
+}
+
+/* CSS Custom Properties approach - set variables on lazy folders */
+.sidebar-folder.lazy-folder {
+  --folder-opacity: 0.5;
+  --folder-color: var(--text-muted);
+  --folder-bg: transparent;
+}
+
+/* Use the custom properties */
+.sidebar-folder.lazy-folder,
+.sidebar-folder.lazy-folder:hover,
+.sidebar-folder.lazy-folder.selected,
+.sidebar-folder.lazy-folder.active {
+  opacity: var(--folder-opacity, 0.5) !important;
+  color: var(--folder-color, var(--text-muted)) !important;
+  background: var(--folder-bg, transparent) !important;
+}
+
+/* NUCLEAR OPTION: Use ID selector for maximum specificity */
+#app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder,
+#app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder:hover,
+#app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder.selected,
+#app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder.active,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder:hover,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder.selected,
+html body #app .sidebar-wrapper .sidebar-body .sidebar-node button.sidebar-folder.lazy-folder.active {
+  opacity: 0.5 !important;
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  pointer-events: auto !important;
+}
