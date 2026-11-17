@@ -54,7 +54,7 @@
 
 .terminal-resize-handle:hover,
 .terminal-resize-handle.dragging {
-  background: var(--accent);
+  background: var(--arc-accent);
 }
 
 /* ─── Header ─── */

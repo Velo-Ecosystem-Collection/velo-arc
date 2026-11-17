@@ -32,6 +32,28 @@ import SettingsPanel from "../features/settings/SettingsPanel";
 import AIPanel from "../features/ai/AIPanel";
 import CommandPalette from "../features/palette/CommandPalette";
 import { Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Toaster } from "@/components/ui/sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import "../styles/settings.css";
 
 /**
@@ -181,6 +203,7 @@ const Layout = () => {
   // Apply theme to document
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
@@ -414,10 +437,13 @@ const Layout = () => {
         const successMessage = "Repository cloned successfully!";
         setCloneProgress({ percent: 100, message: successMessage, indeterminate: false });
         setCloneStatus({ type: "success", message: successMessage });
+        toast.success(successMessage);
         return { ok: true };
       } catch (err) {
         setCloneProgress(null);
-        setCloneStatus({ type: "error", message: err?.message || "Failed to clone repository" });
+        const message = err?.message || "Failed to clone repository";
+        setCloneStatus({ type: "error", message });
+        toast.error(message);
         return { ok: false, error: err };
       }
     },
@@ -916,18 +942,22 @@ const Layout = () => {
         </div>
       </div>
 
-      <div
-        className={`github-clone-overlay ${showGithubClone ? "visible" : ""}`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget && cloneStatus?.type !== "loading") {
-            setShowGithubClone(false);
-            setCloneProgress(null);
-          }
-        }}>
-        <div className="github-clone-dialog">
-          <h3>Clone GitHub Repository</h3>
-          <input
+      <Dialog
+        open={showGithubClone}
+        onOpenChange={(open) => {
+          if (!open && cloneStatus?.type === "loading") return;
+          setShowGithubClone(open);
+          if (!open) setCloneProgress(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Clone GitHub Repository</DialogTitle>
+            <DialogDescription>Enter a public repository URL to load it into your workspace.</DialogDescription>
+          </DialogHeader>
+          <Input
             type="text"
+            aria-label="GitHub repository URL"
             placeholder="https://github.com/username/repository.git"
             value={githubUrl}
             disabled={cloneStatus?.type === "loading"}
@@ -961,10 +991,9 @@ const Layout = () => {
               </div>
             </div>
           )}
-          {cloneStatus && cloneStatus.type !== "loading" && <div className={`clone-status ${cloneStatus.type}`}>{cloneStatus.message}</div>}
-          <div className="dialog-buttons">
-            <button
-              className="btn btn-secondary"
+          <DialogFooter>
+            <Button
+              variant="outline"
               onClick={() => {
                 if (cloneStatus?.type !== "loading") {
                   setShowGithubClone(false);
@@ -973,35 +1002,42 @@ const Layout = () => {
               }}
               disabled={cloneStatus?.type === "loading"}>
               Cancel
-            </button>
-            <button className="btn btn-primary" onClick={handleCloneGithub} disabled={cloneStatus?.type === "loading"}>
+            </Button>
+            <Button onClick={handleCloneGithub} disabled={cloneStatus?.type === "loading"}>
               Clone
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <CommandPalette isOpen={palette.isOpen} mode={palette.mode} commands={paletteCommands} files={paletteFiles} onClose={closePalette} onOpenFile={handlePaletteOpenFile} />
 
-      <div className={`github-clone-overlay ${confirmModal.isOpen ? "visible" : ""}`} onClick={(e) => e.target === e.currentTarget && setConfirmModal({ ...confirmModal, isOpen: false })}>
-        <div className="github-clone-dialog">
-          <h3>{confirmModal.title}</h3>
-          <p className="confirmation-message">{confirmModal.message}</p>
-          <div className="dialog-buttons">
-            <button className="btn btn-secondary" onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}>
+      <AlertDialog
+        open={confirmModal.isOpen}
+        onOpenChange={(open) => setConfirmModal((current) => ({ ...current, isOpen: open }))}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmModal.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmModal.message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
               Cancel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
                 confirmModal.onConfirm?.();
-                setConfirmModal({ ...confirmModal, isOpen: false });
-              }}>
+                setConfirmModal((current) => ({ ...current, isOpen: false }));
+              }}
+            >
               Confirm
-            </button>
-          </div>
-        </div>
-      </div>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Toaster theme={theme === "dark" ? "dark" : "light"} position="bottom-right" />
     </div>
   );
 };

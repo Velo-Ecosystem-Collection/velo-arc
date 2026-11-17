@@ -56,7 +56,7 @@
 }
 
 .ai-scroll-bottom-btn svg {
-  color: var(--accent);
+  color: var(--arc-accent);
 }
 
 @keyframes scroll-btn-in {
@@ -101,7 +101,7 @@
 }
 
 .ai-panel-title svg {
-  color: var(--accent);
+  color: var(--arc-accent);
 }
 
 .ai-panel-header-actions {
@@ -129,7 +129,7 @@
 }
 
 .ai-header-btn.new-chat-btn:hover {
-  color: var(--accent);
+  color: var(--arc-accent);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -322,11 +322,11 @@
 }
 
 .ai-chat-input::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: var(--arc-accent);
 }
 
 .ai-send-btn {
-  background: var(--accent);
+  background: var(--arc-accent);
   color: var(--accent-contrast);
   border: none;
   width: 32px;
@@ -401,7 +401,7 @@
 .ai-welcome-icon {
   width: 48px;
   height: 48px;
-  color: var(--accent);
+  color: var(--arc-accent);
   opacity: 0.8;
 }
 

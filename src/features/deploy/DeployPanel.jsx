@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { toast } from "sonner";
 import { Wallet, Hammer, Rocket, CheckCircle, AlertCircle, Loader, Copy, Check, Play, ChevronDown, ChevronRight, Folder, RefreshCw, ExternalLink, Trash2, ArrowUpCircle, Star, Search } from "lucide-react";
 import { useDeploy } from "../../context/DeployContext";
 import { useContract } from "../../context/ContractContext";
@@ -353,9 +354,15 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
             detail: { type: msg.type === "error" ? "error" : "output", content: msg.content }
           }));
         },
-        onError: () => { setCompileStatus("error"); window.dispatchEvent(new Event("soroban:terminalIdle")); cleanup?.(); },
+        onError: () => {
+          setCompileStatus("error");
+          toast.error("Contract build failed. Check the terminal output for details.");
+          window.dispatchEvent(new Event("soroban:terminalIdle"));
+          cleanup?.();
+        },
         onDone: async () => {
           setCompileStatus("success");
+          toast.success("Contract build completed.");
           window.dispatchEvent(new Event("soroban:terminalIdle"));
           cleanup();
         },
@@ -363,6 +370,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       });
     } catch (err) {
       setCompileStatus("error");
+      toast.error(err?.message || "Could not start the contract build.");
       window.dispatchEvent(new Event("soroban:terminalIdle"));
       window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
         detail: { type: "error", content: err.message }
@@ -388,6 +396,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
     if (!selectedContract) return;
     if (!walletAddress) {
       setDeployStatus("error");
+      toast.error("Connect a wallet before deploying.");
       window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
         detail: { type: "error", content: "Connect an external wallet before deploying." }
       }));
@@ -399,6 +408,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
     const wasmPath = resolveWasmPath(selectedContract, fileContents);
     if (!wasmPath) {
       setDeployStatus("error");
+      toast.error("Build the selected contract before deploying.");
       window.dispatchEvent(new Event("soroban:terminalIdle"));
       window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
         detail: { type: "error", content: "Could not resolve the compiled .wasm path for the selected contract. Build it first." }
@@ -413,6 +423,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
     const salt = saltMode === "manual" ? manualSalt.trim().toLowerCase() : randomSaltHex();
     if (!/^[0-9a-f]{64}$/.test(salt)) {
       setDeployStatus("error");
+      toast.error("The deployment salt must contain exactly 64 hexadecimal characters.");
       window.dispatchEvent(new Event("soroban:terminalIdle"));
       window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
         detail: { type: "error", content: "Invalid salt: provide exactly 64 hex chars (0-9, a-f)." }
@@ -596,6 +607,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
         }
 
         setDeployStatus("success");
+        toast.success(`Contract deployed: ${result.contractId.slice(0, 8)}…`);
       } else {
         throw new Error("Deploy transaction submitted, but no contract ID was returned.");
       }
@@ -611,6 +623,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
                                   "❌ Deploy failed:";
       appendTerminal("error", `${label} ${errString(err)}`);
       setDeployStatus("error");
+      toast.error(errString(err));
     } finally {
       window.dispatchEvent(new Event("soroban:terminalIdle"));
     }

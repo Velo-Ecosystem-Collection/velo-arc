@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   Laptop2,
   Play,
@@ -65,6 +66,7 @@ const LocalDeployView = ({
     });
     if (ok) {
       setSavedEnv(true);
+      toast.success("Saved the contract settings and opened the preview.");
       setTimeout(() => setSavedEnv(false), 4000);
       if (typeof onClearContract === "function") onClearContract();
       handleRunInIde();
@@ -79,12 +81,14 @@ const LocalDeployView = ({
         fileContents || {},
       );
       setDownloadState({ kind: "ok", filename, fileCount });
+      toast.success(`Downloaded ${filename}.`);
       setTimeout(() => setDownloadState({ kind: "idle" }), 4000);
     } catch (err) {
       setDownloadState({
         kind: "error",
         message: err instanceof Error ? err.message : String(err),
       });
+      toast.error(err instanceof Error ? err.message : "Could not download the frontend.");
     }
   }, [treeData, fileContents]);
 

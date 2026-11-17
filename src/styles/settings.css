@@ -47,6 +47,22 @@
   border-left-color: var(--accent-hover);
 }
 
+.settings-tab-list {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.settings-nav-item[data-active] {
+  justify-content: flex-start;
+  border-left: 2px solid var(--arc-accent);
+  border-radius: 0;
+  color: var(--text-primary);
+  text-align: left;
+}
+
 .settings-content {
   flex: 1;
   padding: 40px 60px;

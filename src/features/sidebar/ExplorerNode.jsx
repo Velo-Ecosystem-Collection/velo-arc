@@ -4,6 +4,8 @@ import { ChevronDown, ChevronRight } from "../../components/icons/ChevronIcons";
 import { sortNodes, findParentId, uniqueId } from "../workspace/workspaceUtils";
 import InlineInput from "./InlineInput";
 import RenameInput from "./RenameInput";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 /**
  * Recursive tree node component for the file explorer.
@@ -242,24 +244,27 @@ const ExplorerNode = memo(({ node, depth, tree, expandedFolders, onToggleFolder,
 
     return (
       <div className="sidebar-node">
-        <button
-          className={className}
-          type="button"
-          onClick={handleClick}
-          style={{
-            paddingLeft: `${indent + 32}px`,
-          }}
-          {...sharedProps}>
-          <span className="sidebar-chevron" style={{ position: "absolute", left: `${indent + 12}px` }}>
-            {isFolder && (isExpanded ? <ChevronDown /> : <ChevronRight />)}
-          </span>
-          <span className="sidebar-node-icon">
-            <FolderIconImg folderName={node.name} isOpen={isExpanded} />
-          </span>
-          <span className={`sidebar-node-label ${isCut ? "cut-label" : ""}`}>{node.name}</span>
-        </button>
-
-        {isExpanded && (
+        <Collapsible open={isExpanded} onOpenChange={handleClick} className="group/collapsible">
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton asChild isActive={isSelected} className={className}>
+              <button
+                className={className}
+                type="button"
+                aria-expanded={isExpanded}
+                style={{ paddingLeft: `${indent + 32}px` }}
+                {...sharedProps}
+              >
+                <span className="sidebar-chevron" style={{ position: "absolute", left: `${indent + 12}px` }}>
+                  {isExpanded ? <ChevronDown /> : <ChevronRight />}
+                </span>
+                <span className="sidebar-node-icon">
+                  <FolderIconImg folderName={node.name} isOpen={isExpanded} />
+                </span>
+                <span className={`sidebar-node-label ${isCut ? "cut-label" : ""}`}>{node.name}</span>
+              </button>
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
           <div className="sidebar-children">
             {folderUploadProgress?.[node.id] && (
               <div className="upload-progress-bar folder-progress" style={{ marginLeft: `${(depth + 1) * 8 + 8}px` }}>
@@ -323,7 +328,8 @@ const ExplorerNode = memo(({ node, depth, tree, expandedFolders, onToggleFolder,
               );
             })()}
           </div>
-        )}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     );
   }
@@ -336,22 +342,24 @@ const ExplorerNode = memo(({ node, depth, tree, expandedFolders, onToggleFolder,
   const fileClassName = ["sidebar-file", activeFileId === node.id && "active", isSelected && "selected", isDragging && "dragging", isCut && "cut"].filter(Boolean).join(" ");
 
   return (
-    <button
-      className={fileClassName}
-      type="button"
-      onClick={() => {
-        onFileSelect(node.id);
-        onNodeSelect?.(node.id);
-      }}
-      style={{
-        paddingLeft: `${indent + 32}px`,
-      }}
-      {...sharedProps}>
-      <span className="sidebar-node-icon">
-        <FileIconImg filename={node.name} />
-      </span>
-      <span className={`sidebar-node-label ${isCut ? "cut-label" : ""}`}>{node.name}</span>
-    </button>
+    <SidebarMenuButton asChild isActive={activeFileId === node.id} className={fileClassName}>
+      <button
+        className={fileClassName}
+        type="button"
+        aria-current={activeFileId === node.id ? "page" : undefined}
+        onClick={() => {
+          onFileSelect(node.id);
+          onNodeSelect?.(node.id);
+        }}
+        style={{ paddingLeft: `${indent + 32}px` }}
+        {...sharedProps}
+      >
+        <span className="sidebar-node-icon">
+          <FileIconImg filename={node.name} />
+        </span>
+        <span className={`sidebar-node-label ${isCut ? "cut-label" : ""}`}>{node.name}</span>
+      </button>
+    </SidebarMenuButton>
   );
 });
 

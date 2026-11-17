@@ -53,12 +53,12 @@
 }
 
 .contract-pill:hover {
-  border-color: var(--accent);
+  border-color: var(--arc-accent);
   background: var(--hover-bg);
 }
 
 .contract-pill.active {
-  border-color: var(--accent);
+  border-color: var(--arc-accent);
 }
 
 .pill-label {
@@ -66,7 +66,7 @@
 }
 
 .pill-value {
-  color: var(--accent);
+  color: var(--arc-accent);
 }
 
 .interact-close-btn {
@@ -139,8 +139,8 @@
 
 .function-item.active {
   background: var(--active-bg);
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--arc-accent);
+  color: var(--arc-accent);
 }
 
 .function-item svg {
@@ -176,7 +176,7 @@
 .form-header h3 {
   font-size: 20px;
   font-family: var(--font-mono);
-  color: var(--accent);
+  color: var(--arc-accent);
   margin: 0 0 8px 0;
 }
 
@@ -218,7 +218,7 @@
 
 .interact-input:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--arc-accent);
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
 }
 
@@ -253,7 +253,7 @@
 }
 
 .execution-result.success {
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--arc-accent);
 }
 
 .result-header {
@@ -311,7 +311,7 @@
   right: 10px;
   width: 8px;
   height: 8px;
-  background: var(--accent);
+  background: var(--arc-accent);
   border-radius: 50%;
   border: 2px solid var(--sidebar-bg);
 }

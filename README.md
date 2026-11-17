@@ -89,12 +89,21 @@ Build, test, and deploy Rust smart contracts on the Stellar network — without 
 | ----------- | --------------------------------------------------------------------- |
 | Framework   | [React 18](https://react.dev/) + [React Router](https://reactrouter.com/) (`createHashRouter`) |
 | Build tool  | [Vite 8](https://vitejs.dev/)                                         |
+| UI          | [Tailwind CSS 4](https://tailwindcss.com/) + local [shadcn/ui](https://ui.shadcn.com/) components |
 | Editor      | [Monaco Editor](https://microsoft.github.io/monaco-editor/)           |
 | Icons       | [Lucide React](https://lucide.dev/)                                   |
 | Wallet      | [Freighter](https://www.freighter.app/)                               |
 | Backend     | Go service (separate repo) exposed at `/api` — WebSocket build streaming |
 | Contracts   | [Soroban SDK](https://developers.stellar.org/docs/build/smart-contracts/getting-started/setup) (Rust) |
 | Deploy UX   | Multi-contract deploy history, filters, pinning, diff modal, inline invoke |
+
+### UI Components
+
+Reusable shadcn components live in `src/components/ui/` and use the aliases and theme settings in `components.json`. Add more with `npx shadcn@latest add <component>`; the Vite/Tailwind setup is already configured. The IDE sidebar uses the sidebar-09 navigation pattern and sidebar-11 collapsible file-tree pattern while retaining Arc's workspace, panel, drag-and-drop, and keyboard behavior. Sonner is mounted by the app layout for operation notifications.
+
+Focused browser coverage for the redesigned navigation, settings, persistence, and notifications is available with `npm run test:e2e:ui` (install the matching browser once with `npx playwright install chromium`).
+
+The two newer AI UI components that require React 19 are omitted to keep the app on React 18. The rest of the generated component library remains available for reuse.
 
 ---
 
@@ -126,6 +135,7 @@ Vite proxies `/api` → `http://localhost:8080` in dev (see `vite.config.js`), s
 | `npm run build`   | Produce a production build in `dist/`.            |
 | `npm test`        | Run the Node.js test suite.                       |
 | `npm run check`   | Run tests and the production build.               |
+| `npm run test:e2e:ui` | Run the Playwright UI regression suite.        |
 | `npm run preview` | Serve the built `dist/` locally for a smoke test. |
 
 Husky configures the Git hooks during `npm install`. Before each commit, `.husky/pre-commit` checks staged whitespace and runs `npm run check` (tests and the production build). Run `npm run hooks:install` to configure the hooks again.
@@ -167,7 +177,7 @@ velo-arc/
 ├── public/                 # Static assets (logos, icons, codicons)
 ├── src/
 │   ├── app/                # Router (HashRouter)
-│   ├── components/         # Layout, shared UI, icons
+│   ├── components/         # Layout, shadcn UI primitives, icons
 │   ├── context/            # Contract interaction context
 │   ├── features/
 │   │   ├── editor/         # Monaco wrapper + language utils

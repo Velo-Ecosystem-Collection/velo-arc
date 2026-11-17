@@ -63,7 +63,7 @@
 }
 
 .activity-btn.active {
-  color: var(--accent);
+  color: var(--arc-accent);
   background: var(--active-bg);
 }
 
@@ -74,7 +74,7 @@
   top: 12px;
   bottom: 12px;
   width: 2px;
-  background: var(--accent);
+  background: var(--arc-accent);
 }
 
 .sidebar-panel {
@@ -445,7 +445,7 @@
 /* ─── External Drop Zone ─── */
 
 .sidebar-body.drag-over-external {
-  border: 2px dashed var(--accent);
+  border: 2px dashed var(--arc-accent);
   position: relative;
 }
 
@@ -465,7 +465,7 @@
 
 .upload-progress-bar.folder-progress .upload-progress-fill {
   height: 4px;
-  background: var(--accent);
+  background: var(--arc-accent);
   border-radius: 3px;
   transition: width 0.3s ease;
   min-width: 10px;
@@ -517,7 +517,7 @@
   border-radius: 2px;
   cursor: pointer;
   font-size: var(--font-size-sm);
-  background: var(--accent);
+  background: var(--arc-accent);
   color: var(--main-bg);
   border-color: transparent;
   transition: background 0.1s;
@@ -531,7 +531,7 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  background: var(--accent);
+  background: var(--arc-accent);
   color: var(--main-bg);
   padding: 8px 16px;
   border-radius: 6px;
@@ -557,7 +557,7 @@
   width: 12px;
   height: 12px;
   border: 2px solid var(--text-muted);
-  border-top-color: var(--accent);
+  border-top-color: var(--arc-accent);
   border-radius: 50%;
   animation: lazySpin 0.6s linear infinite;
 }

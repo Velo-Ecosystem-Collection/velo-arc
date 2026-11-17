@@ -88,7 +88,7 @@
 
 .github-device-code:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: var(--accent);
+  border-color: var(--arc-accent);
   transform: translateY(-1px);
 }
 
@@ -102,7 +102,7 @@
   top: -30px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--accent);
+  background: var(--arc-accent);
   color: var(--accent-contrast);
   padding: 4px 10px;
   border-radius: 4px;
@@ -133,7 +133,7 @@
 }
 
 .github-device-hint a {
-  color: var(--accent);
+  color: var(--arc-accent);
   text-decoration: none;
 }
 
@@ -312,7 +312,7 @@
 }
 
 .github-form-input:focus {
-  border-color: var(--accent);
+  border-color: var(--arc-accent);
 }
 
 .github-form-input::placeholder {
@@ -387,7 +387,7 @@ N.github-toggle-label {
 }
 
 .github-toggle-label input[type="checkbox"] {
-  accent-color: var(--accent);
+  accent-color: var(--arc-accent);
 }
 
 
@@ -483,7 +483,7 @@ N.github-toggle-label {
 }
 
 .github-branch-input:focus {
-  border-color: var(--accent);
+  border-color: var(--arc-accent);
 }
 
 .github-branch-input::placeholder {

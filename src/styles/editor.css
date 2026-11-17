@@ -160,8 +160,8 @@
 
 .editor-toolbar-btn:hover {
   background: var(--hover-bg);
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--arc-accent);
+  color: var(--arc-accent);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
@@ -171,9 +171,9 @@
 }
 
 .editor-toolbar-btn.active {
-  background: var(--accent) !important;
+  background: var(--arc-accent) !important;
   color: var(--accent-contrast) !important;
-  border-color: var(--accent) !important;
+  border-color: var(--arc-accent) !important;
 }
 
 /* ─── Markdown Split Layout ─── */

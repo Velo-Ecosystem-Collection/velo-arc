@@ -2,11 +2,14 @@ import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import router from './app/router';
 import MobileGuard from './components/common/MobileGuard';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const App = () => (
   <React.StrictMode>
     <MobileGuard>
-      <RouterProvider router={router} />
+      <TooltipProvider>
+        <RouterProvider router={router} />
+      </TooltipProvider>
     </MobileGuard>
   </React.StrictMode>
 );
