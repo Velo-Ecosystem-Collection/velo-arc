@@ -125,7 +125,10 @@ Vite proxies `/api` → `http://localhost:8080` in dev (see `vite.config.js`), s
 | `npm run dev`     | Start the Vite dev server on port `3000`.         |
 | `npm run build`   | Produce a production build in `dist/`.            |
 | `npm test`        | Run the Node.js test suite.                       |
+| `npm run check`   | Run tests and the production build.               |
 | `npm run preview` | Serve the built `dist/` locally for a smoke test. |
+
+Husky configures the Git hooks during `npm install`. Before each commit, `.husky/pre-commit` checks staged whitespace and runs `npm run check` (tests and the production build). Run `npm run hooks:install` to configure the hooks again.
 
 ---
 
