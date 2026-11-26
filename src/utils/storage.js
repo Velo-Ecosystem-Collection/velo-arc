@@ -3,12 +3,14 @@
  * Handles save/load with versioning and race condition prevention.
  */
 
+import { isArcEventMode, scopedStorageKey } from '../services/arcSession.js';
+
 const STORAGE_KEY = 'velo-arc-state';
 const LEGACY_STORAGE_KEY = 'soroban-studio-state';
 const STATE_VERSION = '1.0';
 
-let cachedState = null;
-let lastSaved = 0;
+const cachedStates = new Map();
+const lastSavedAt = new Map();
 
 const migrateLegacyState = (state) => {
   const history = state.terminal?.history;
@@ -29,11 +31,12 @@ const migrateLegacyState = (state) => {
 
 export const loadState = () => {
   try {
-    if (cachedState) return cachedState;
-    let serialized = localStorage.getItem(STORAGE_KEY);
+    const key = scopedStorageKey(STORAGE_KEY);
+    if (cachedStates.has(key)) return cachedStates.get(key);
+    let serialized = localStorage.getItem(key);
     let shouldMigrateLegacyState = false;
 
-    if (serialized === null) {
+    if (serialized === null && !isArcEventMode) {
       serialized = localStorage.getItem(LEGACY_STORAGE_KEY);
       shouldMigrateLegacyState = serialized !== null;
     }
@@ -49,14 +52,14 @@ export const loadState = () => {
 
     if (shouldMigrateLegacyState) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(key, JSON.stringify(state));
         localStorage.removeItem(LEGACY_STORAGE_KEY);
       } catch {
         console.warn('Failed to migrate legacy Velo Arc state; keeping it available in memory.');
       }
     }
 
-    cachedState = state;
+    cachedStates.set(key, state);
     return state;
   } catch (err) {
     console.error('Failed to load state from localStorage:', err);
@@ -66,9 +69,10 @@ export const loadState = () => {
 
 export const saveState = (state) => {
   try {
+    const key = scopedStorageKey(STORAGE_KEY);
     const now = Date.now();
-    if (now - lastSaved < 50) return;
-    lastSaved = now;
+    if (now - (lastSavedAt.get(key) || 0) < 50) return;
+    lastSavedAt.set(key, now);
 
     const existing = loadState() || {};
     const merged = {
@@ -78,8 +82,8 @@ export const saveState = (state) => {
       _lastUpdated: now,
     };
 
-    cachedState = merged;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    cachedStates.set(key, merged);
+    localStorage.setItem(key, JSON.stringify(merged));
   } catch (err) {
     console.error('Failed to save state to localStorage:', err);
   }
@@ -87,9 +91,10 @@ export const saveState = (state) => {
 
 export const clearState = () => {
   try {
-    cachedState = null;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    const key = scopedStorageKey(STORAGE_KEY);
+    cachedStates.delete(key);
+    localStorage.removeItem(key);
+    if (!isArcEventMode) localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch (err) {
     console.error('Failed to clear localStorage:', err);
   }

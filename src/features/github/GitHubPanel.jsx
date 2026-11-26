@@ -15,6 +15,7 @@ import {
   pushFilesToRepo,
 } from "../../services/githubAuthService";
 import { collectProjectFiles } from "../../services/backendService";
+import { scopedStorageKey } from "../../services/arcSession";
 
 // ─── Commit message config ──────────────────────────────────────
 const COMMIT_MESSAGE_KEY = "soroban:lastCommitMessage";
@@ -84,7 +85,7 @@ const GitHubPanel = memo(({ treeData, fileContents, onConfirm, onOpenGithubRepos
   const [newRepoBranch, setNewRepoBranch] = useState("");
   const [existingTargetBranch, setExistingTargetBranch] = useState(() => {
     try {
-      return localStorage.getItem(EXISTING_BRANCH_KEY) || "";
+      return localStorage.getItem(scopedStorageKey(EXISTING_BRANCH_KEY)) || "";
     } catch {
       return "";
     }
@@ -98,7 +99,7 @@ const GitHubPanel = memo(({ treeData, fileContents, onConfirm, onOpenGithubRepos
   // Commit message (shared across create/existing views; prefilled from last use)
   const [commitMessage, setCommitMessage] = useState(() => {
     try {
-      return localStorage.getItem(COMMIT_MESSAGE_KEY) || "";
+      return localStorage.getItem(scopedStorageKey(COMMIT_MESSAGE_KEY)) || "";
     } catch {
       return "";
     }
@@ -115,7 +116,7 @@ const GitHubPanel = memo(({ treeData, fileContents, onConfirm, onOpenGithubRepos
   const persistCommitMessage = useCallback(() => {
     try {
       if (commitMessage.trim()) {
-        localStorage.setItem(COMMIT_MESSAGE_KEY, commitMessage);
+        localStorage.setItem(scopedStorageKey(COMMIT_MESSAGE_KEY), commitMessage);
       }
     } catch {
       /* localStorage unavailable — non-fatal */
@@ -127,9 +128,9 @@ const GitHubPanel = memo(({ treeData, fileContents, onConfirm, onOpenGithubRepos
   useEffect(() => {
     try {
       if (existingTargetBranch.trim()) {
-        localStorage.setItem(EXISTING_BRANCH_KEY, existingTargetBranch.trim());
+        localStorage.setItem(scopedStorageKey(EXISTING_BRANCH_KEY), existingTargetBranch.trim());
       } else {
-        localStorage.removeItem(EXISTING_BRANCH_KEY);
+        localStorage.removeItem(scopedStorageKey(EXISTING_BRANCH_KEY));
       }
     } catch {
       /* ignore persistence errors */

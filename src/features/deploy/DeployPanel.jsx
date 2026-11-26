@@ -12,6 +12,7 @@ import {
 } from "../../services/backendService";
 import { signAndSubmitWithSigner } from "../../services/freighter";
 import { signWithWallet } from "../../services/walletManager";
+import { isArcEventMode, scopedStorageKey } from "../../services/arcSession";
 import {
   findContracts,
   groupContracts,
@@ -56,7 +57,7 @@ const randomSaltHex = () => (
 
 const loadDeployPresets = () => {
   try {
-    const raw = localStorage.getItem(DEPLOY_PRESETS_KEY);
+    const raw = localStorage.getItem(scopedStorageKey(DEPLOY_PRESETS_KEY));
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" ? parsed : {};
@@ -66,12 +67,12 @@ const loadDeployPresets = () => {
 };
 
 const saveDeployPresets = (data) => {
-  try { localStorage.setItem(DEPLOY_PRESETS_KEY, JSON.stringify(data || {})); } catch {}
+  try { localStorage.setItem(scopedStorageKey(DEPLOY_PRESETS_KEY), JSON.stringify(data || {})); } catch {}
 };
 
 const loadInvokeCases = () => {
   try {
-    const raw = localStorage.getItem(INVOKE_CASES_KEY);
+    const raw = localStorage.getItem(scopedStorageKey(INVOKE_CASES_KEY));
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" ? parsed : {};
@@ -81,7 +82,7 @@ const loadInvokeCases = () => {
 };
 
 const saveInvokeCases = (data) => {
-  try { localStorage.setItem(INVOKE_CASES_KEY, JSON.stringify(data || {})); } catch {}
+  try { localStorage.setItem(scopedStorageKey(INVOKE_CASES_KEY), JSON.stringify(data || {})); } catch {}
 };
 
 // Dispatch a command to the Terminal panel
@@ -93,8 +94,9 @@ const runInTerminal = (cmd, files, onDone, onContractId) => {
 const StatusBadge = ({ status }) => {
   if (!status) return null;
   const map = {
+    queued:  { icon: <Loader size={11} />,                    label: "Queued",   cls: "badge-running" },
     running: { icon: <Loader size={11} className="spin" />, label: "Running",  cls: "badge-running" },
-    success: { icon: <CheckCircle size={11} />,             label: "Success",  cls: "badge-success" },
+    success: { icon: <CheckCircle size={11} />,             label: "Completed", cls: "badge-success" },
     error:   { icon: <AlertCircle size={11} />,             label: "Failed",   cls: "badge-error"   },
   };
   const s = map[status];
@@ -140,6 +142,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
   const [freighterBalance, setFreighterBalance] = useState(null);
   const [alias, setAlias] = useState("my-contract");
   const [deployNetwork, setDeployNetwork] = useState(DEFAULT_NETWORK);
+  const effectiveDeployNetwork = isArcEventMode ? "testnet" : deployNetwork;
   const [saltMode, setSaltMode] = useState(DEFAULT_SALT_MODE); // random | manual
   const [manualSalt, setManualSalt] = useState("");
   const [presetName, setPresetName] = useState("");
@@ -176,7 +179,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
   const groupedContracts = useMemo(() => groupContracts(contracts), [contracts]);
 
   const [selectedPath, setSelectedPath] = useState(() => {
-    try { return localStorage.getItem(CONTRACT_STORAGE_KEY) || ""; }
+    try { return localStorage.getItem(scopedStorageKey(CONTRACT_STORAGE_KEY)) || ""; }
     catch { return ""; }
   });
 
@@ -197,13 +200,13 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
   // Persist the resolved selection so the fallback sticks across reloads.
   useEffect(() => {
     if (!selectedContract) {
-      try { localStorage.removeItem(CONTRACT_STORAGE_KEY); } catch {}
+      try { localStorage.removeItem(scopedStorageKey(CONTRACT_STORAGE_KEY)); } catch {}
       return;
     }
     if (selectedContract.path !== selectedPath) {
       setSelectedPath(selectedContract.path);
     }
-    try { localStorage.setItem(CONTRACT_STORAGE_KEY, selectedContract.path); } catch {}
+    try { localStorage.setItem(scopedStorageKey(CONTRACT_STORAGE_KEY), selectedContract.path); } catch {}
   }, [selectedContract, selectedPath]);
 
   useEffect(() => {
@@ -348,21 +351,36 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
         detail: { type: "command", content: cmd, cwd: "~/project" }
       }));
+      let compileFailed = false;
       const cleanup = connectBuildStream(sessionId, jobId, {
         onMessage: (msg) => {
+          if (msg.type === "status") {
+            if (["queued", "running"].includes(msg.content)) setCompileStatus(msg.content);
+            if (msg.content === "failed") {
+              compileFailed = true;
+              setCompileStatus("error");
+            }
+          }
+          if (msg.type === "error") compileFailed = true;
           window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
             detail: { type: msg.type === "error" ? "error" : "output", content: msg.content }
           }));
         },
         onError: () => {
+          compileFailed = true;
           setCompileStatus("error");
           toast.error("Contract build failed. Check the terminal output for details.");
           window.dispatchEvent(new Event("soroban:terminalIdle"));
           cleanup?.();
         },
         onDone: async () => {
-          setCompileStatus("success");
-          toast.success("Contract build completed.");
+          if (compileFailed) {
+            setCompileStatus("error");
+            toast.error("Contract build failed. Check the terminal output for details.");
+          } else {
+            setCompileStatus("success");
+            toast.success("Contract build completed.");
+          }
           window.dispatchEvent(new Event("soroban:terminalIdle"));
           cleanup();
         },
@@ -433,8 +451,8 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
     // Prefix alias with short session ID to avoid collisions between users on shared server key
     const sessionPrefix = getSessionId().slice(0, 8);
     const scopedAlias = `${sessionPrefix}-${alias}`;
-    const uploadCmd = `stellar contract upload --wasm ${wasmPath} --source ${sourceKey} --network ${deployNetwork}${buildOnly}`;
-    const deployCmd = `stellar contract deploy --wasm ${wasmPath} --source ${sourceKey} --network ${deployNetwork} --alias ${scopedAlias} --salt ${salt}${buildOnly}`;
+    const uploadCmd = `stellar contract upload --wasm ${wasmPath} --source ${sourceKey} --network ${effectiveDeployNetwork}${buildOnly}`;
+    const deployCmd = `stellar contract deploy --wasm ${wasmPath} --source ${sourceKey} --network ${effectiveDeployNetwork} --alias ${scopedAlias} --salt ${salt}${buildOnly}`;
 
     // Snapshot metadata that will be attached to the history record once
     // the contract ID arrives. Captured here so the async handlers below
@@ -444,7 +462,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       crateName: selectedContract.crateName || selectedContract.name,
       alias,
       scopedAlias,
-      network: deployNetwork,
+      network: effectiveDeployNetwork,
       wallet: walletProviderId || "wallet",
       walletAddress,
     };
@@ -525,6 +543,14 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
 
         cleanup = connectBuildStream(sessionId, jobId, {
           onMessage: (msg) => {
+            if (msg.type === "status" && msg.content === "failed") {
+              setDeployStatus("error");
+              settle(reject, new Error("The Testnet transaction build failed."));
+              return;
+            }
+            if (msg.type === "status" && ["queued", "running"].includes(msg.content)) {
+              setDeployStatus(msg.content);
+            }
             fullLog += (msg.content || "") + "\n";
             window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
               detail: { type: msg.type === "error" ? "error" : "output", content: msg.content }
@@ -595,7 +621,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
                 const updated = appendDeploymentToReadme(existing, {
                   contractId: result.contractId,
                   txHash: result.hash || "",
-                  network: deployNetwork,
+                  network: effectiveDeployNetwork,
                   wallet: walletProviderId || "wallet",
                   walletAddress,
                 });
@@ -627,7 +653,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
     } finally {
       window.dispatchEvent(new Event("soroban:terminalIdle"));
     }
-  }, [treeData, fileContents, alias, walletAddress, walletProviderId, walletNetworkPassphrase, walletClient, selectedContract, addDeployment, deployNetwork, saltMode, manualSalt, setFileContents]);
+  }, [treeData, fileContents, alias, walletAddress, walletProviderId, walletNetworkPassphrase, walletClient, selectedContract, addDeployment, effectiveDeployNetwork, saltMode, manualSalt, setFileContents]);
 
   // ─── Invoke → stream to Terminal (scoped per contract) ───────────────────
 
@@ -804,7 +830,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       id: selectedPresetId || `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
       name,
       alias: alias.trim(),
-      network: deployNetwork,
+      network: effectiveDeployNetwork,
       saltMode,
       manualSalt: saltMode === "manual" ? manualSalt.trim().toLowerCase() : "",
       updatedAt: Date.now(),
@@ -816,7 +842,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       return { ...prev, [path]: [nextPreset, ...withoutSameId].slice(0, 20) };
     });
     setSelectedPresetId(nextPreset.id);
-  }, [selectedContract, presetName, selectedPresetId, alias, deployNetwork, saltMode, manualSalt]);
+  }, [selectedContract, presetName, selectedPresetId, alias, effectiveDeployNetwork, saltMode, manualSalt]);
 
   const handleLoadPreset = useCallback((id) => {
     if (!selectedContract?.path) return;
@@ -1036,12 +1062,13 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
           <label className="deploy-label">Network</label>
           <select
             className="deploy-input"
-            value={deployNetwork}
+            value={effectiveDeployNetwork}
             onChange={(e) => setDeployNetwork(e.target.value)}
+            disabled={isArcEventMode}
           >
             <option value="testnet">Testnet</option>
-            <option value="futurenet">Futurenet</option>
-            <option value="mainnet">Mainnet</option>
+            {!isArcEventMode ? <option value="futurenet">Futurenet</option> : null}
+            {!isArcEventMode ? <option value="mainnet">Mainnet</option> : null}
           </select>
         </div>
 

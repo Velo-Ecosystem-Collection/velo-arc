@@ -1,0 +1,46 @@
+.arc-event-gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  color: #e4e4e7;
+  background: #09090b;
+}
+
+.arc-event-gate section {
+  max-width: 30rem;
+  text-align: center;
+}
+
+.arc-event-gate h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.arc-event-gate p {
+  color: #a1a1aa;
+}
+
+.arc-event-gate a,
+.arc-event-return a {
+  color: #7dd3fc;
+}
+
+.arc-event-return {
+  position: fixed;
+  z-index: 1000;
+  top: 0.65rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  max-width: min(42rem, calc(100vw - 2rem));
+  color: #d4d4d8;
+  font-size: 0.75rem;
+}
+
+.arc-event-return span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

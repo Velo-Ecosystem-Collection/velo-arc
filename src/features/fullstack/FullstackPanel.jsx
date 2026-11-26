@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { LogOut, Triangle, Sparkles, X, Laptop2, Globe } from "lucide-react";
 import { useFullstack } from "../../context/FullstackContext";
 import { useContract } from "../../context/ContractContext";
+import { scopedStorageKey } from "../../services/arcSession";
 import VercelConnect from "./VercelConnect";
 import ProjectList from "./ProjectList";
 import DeploymentList from "./DeploymentList";
@@ -65,13 +66,13 @@ const FullstackPanel = ({ treeData, fileContents, setFileContents, setTreeData }
   // machine before signing into a third-party platform.
   const [mode, setMode] = useState(() => {
     try {
-      return localStorage.getItem(MODE_KEY) || "local";
+      return localStorage.getItem(scopedStorageKey(MODE_KEY)) || "local";
     } catch {
       return "local";
     }
   });
   useEffect(() => {
-    try { localStorage.setItem(MODE_KEY, mode); } catch { /* ignore */ }
+    try { localStorage.setItem(scopedStorageKey(MODE_KEY), mode); } catch { /* ignore */ }
   }, [mode]);
 
   // Most-recent contract that landed via the Deploy panel. We keep a short
