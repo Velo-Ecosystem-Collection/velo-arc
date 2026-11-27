@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { connectStellarWallet, getConnectedWallet, WALLET_PROVIDERS } from "../services/walletManager";
 import { registerFreighterWallet } from "../services/backendService";
 import { getPreviewContract, loadHistory } from "../features/deploy/deploymentHistory";
+import { getArcSessionAccount, isArcEventMode } from "../services/arcSession";
 
 const ContractContext = createContext(null);
 
@@ -36,6 +37,10 @@ export const ContractProvider = ({ children }) => {
       try {
         const connected = await getConnectedWallet();
         if (!connected?.address) return;
+        if (isArcEventMode && connected.address !== getArcSessionAccount()) {
+          setError("Connect the same Testnet Freighter account you used to open Velo Arc.");
+          return;
+        }
         setWalletAddress(connected.address);
         setWalletNetwork(connected.network || null);
         setWalletNetworkPassphrase(connected.networkPassphrase || null);
@@ -76,6 +81,10 @@ export const ContractProvider = ({ children }) => {
       setError(null);
       const { address, network, networkPassphrase, wrongNetwork, client, providerId: connectedProvider } = await connectStellarWallet(providerId);
       if (address) {
+        if (isArcEventMode && address !== getArcSessionAccount()) {
+          setError("Connect the same Testnet Freighter account you used to open Velo Arc.");
+          return null;
+        }
         setWalletAddress(address);
         setWalletNetwork(network || null);
         setWalletNetworkPassphrase(networkPassphrase || null);

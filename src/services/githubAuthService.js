@@ -6,7 +6,7 @@
  * to bypass CORS restrictions.
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+import { API_BASE, arcFetch, scopedStorageKey } from "./arcSession";
 
 // ─── Configuration ───────────────────────────────────────────────
 // Replace with your GitHub OAuth App Client ID
@@ -17,23 +17,23 @@ const GITHUB_SCOPES = "repo";
 const TOKEN_KEY = "soroban_github_token";
 const USER_KEY = "soroban_github_user";
 
-export const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
+export const getStoredToken = () => localStorage.getItem(scopedStorageKey(TOKEN_KEY));
 export const getStoredUser = () => {
   try {
-    return JSON.parse(localStorage.getItem(USER_KEY));
+    return JSON.parse(localStorage.getItem(scopedStorageKey(USER_KEY)));
   } catch {
     return null;
   }
 };
 
 export const storeAuth = (token, user) => {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.setItem(scopedStorageKey(TOKEN_KEY), token);
+  localStorage.setItem(scopedStorageKey(USER_KEY), JSON.stringify(user));
 };
 
 export const clearAuth = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(scopedStorageKey(TOKEN_KEY));
+  localStorage.removeItem(scopedStorageKey(USER_KEY));
 };
 
 // ─── Device Flow ─────────────────────────────────────────────────
@@ -43,7 +43,7 @@ export const clearAuth = () => {
  * Returns { device_code, user_code, verification_uri, expires_in, interval }
  */
 export const initiateDeviceFlow = async () => {
-  const res = await fetch(`${API_BASE}/github/device-code`, {
+  const res = await arcFetch(`${API_BASE}/github/device-code`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -74,7 +74,7 @@ export const pollForToken = async (deviceCode, interval = 5, signal) => {
 
     await new Promise((resolve) => setTimeout(resolve, pollInterval));
 
-    const res = await fetch(`${API_BASE}/github/access-token`, {
+    const res = await arcFetch(`${API_BASE}/github/access-token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -118,7 +118,7 @@ export const pollForToken = async (deviceCode, interval = 5, signal) => {
  * Fetch the authenticated user's profile.
  */
 export const getUserInfo = async (token) => {
-  const res = await fetch(`${API_BASE}/github/api/user`, {
+  const res = await arcFetch(`${API_BASE}/github/api/user`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -165,10 +165,10 @@ export const listUserRepos = async (token, page = 1) => {
   let res;
   try {
     // Preferred request: include GitHub-style filters if the proxy supports them.
-    res = await fetch(`${API_BASE}/github/repos?${params.toString()}`, { headers });
+    res = await arcFetch(`${API_BASE}/github/repos?${params.toString()}`, { headers });
   } catch (err) {
     // Fallback for stricter proxies that break on extra query params.
-    res = await fetch(`${API_BASE}/github/repos?page=${page}`, { headers });
+    res = await arcFetch(`${API_BASE}/github/repos?page=${page}`, { headers });
   }
 
   if (!res.ok) {
@@ -211,7 +211,7 @@ export const listAllUserRepos = async (token, maxPages = 60) => {
  * GET repository metadata (default_branch, owner, permissions).
  */
 export const getRepository = async (token, owner, repo) => {
-  const res = await fetch(`${API_BASE}/github/api/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, {
+  const res = await arcFetch(`${API_BASE}/github/api/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -231,7 +231,7 @@ export const getRepository = async (token, owner, repo) => {
  */
 export const listRepositoryBranches = async (token, owner, repo, perPage = 100) => {
   const params = new URLSearchParams({ per_page: String(perPage) });
-  const res = await fetch(`${API_BASE}/github/api/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches?${params.toString()}`, {
+  const res = await arcFetch(`${API_BASE}/github/api/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches?${params.toString()}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -249,7 +249,7 @@ export const listRepositoryBranches = async (token, owner, repo, perPage = 100) 
  */
 export const searchRepositories = async (token, query, perPage = 15) => {
   const params = new URLSearchParams({ q: query, per_page: String(perPage) });
-  const res = await fetch(`${API_BASE}/github/api/search/repositories?${params.toString()}`, {
+  const res = await arcFetch(`${API_BASE}/github/api/search/repositories?${params.toString()}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -265,7 +265,7 @@ export const searchRepositories = async (token, query, perPage = 15) => {
  * Create a new repository for the authenticated user.
  */
 export const createRepository = async (token, name, isPrivate = false, description = "") => {
-  const res = await fetch(`${API_BASE}/github/api/user/repos`, {
+  const res = await arcFetch(`${API_BASE}/github/api/user/repos`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -341,7 +341,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
 
   try {
     console.log(`[GitHub Service] Checking state for branch '${branch}' in ${owner}/${repo}...`);
-    let refRes = await fetch(`${apiBase}/git/ref/heads/${branch}`, { headers });
+    let refRes = await arcFetch(`${apiBase}/git/ref/heads/${branch}`, { headers });
 
     if (refRes.status === 409 || refRes.status === 404) {
       // 409 = Git Repository is empty (no commits yet).
@@ -357,7 +357,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
       const isBinary = isBinaryFile(seedPath);
 
       console.log(`[GitHub Service] Seeding with file: ${seedPath}`);
-      const seedRes = await fetch(`${apiBase}/contents/${seedPath}`, {
+      const seedRes = await arcFetch(`${apiBase}/contents/${seedPath}`, {
         method: "PUT",
         headers,
         body: JSON.stringify({
@@ -374,7 +374,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
 
       console.log(`[GitHub Service] Repository seeded successfully. Refreshing state...`);
       // Refresh ref status after seeding
-      refRes = await fetch(`${apiBase}/git/ref/heads/${branch}`, { headers });
+      refRes = await arcFetch(`${apiBase}/git/ref/heads/${branch}`, { headers });
     }
 
     if (refRes.ok) {
@@ -382,7 +382,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
       latestCommitSha = refData.object.sha;
       console.log(`[GitHub Service] Found latest commit: ${latestCommitSha}`);
 
-      const commitRes = await fetch(`${apiBase}/git/commits/${latestCommitSha}`, { headers });
+      const commitRes = await arcFetch(`${apiBase}/git/commits/${latestCommitSha}`, { headers });
       if (commitRes.ok) {
         const commitData = await commitRes.json();
         baseTreeSha = commitData.tree.sha;
@@ -411,7 +411,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
     const content = files[path];
     const isBinary = isBinaryFile(path);
 
-    const blobRes = await fetch(`${apiBase}/git/blobs`, {
+    const blobRes = await arcFetch(`${apiBase}/git/blobs`, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -443,7 +443,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
     treeBody.base_tree = baseTreeSha;
   }
 
-  const treeRes = await fetch(`${apiBase}/git/trees`, {
+  const treeRes = await arcFetch(`${apiBase}/git/trees`, {
     method: "POST",
     headers,
     body: JSON.stringify(treeBody),
@@ -468,7 +468,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
     commitBody.parents = [latestCommitSha];
   }
 
-  const commitRes = await fetch(`${apiBase}/git/commits`, {
+  const commitRes = await arcFetch(`${apiBase}/git/commits`, {
     method: "POST",
     headers,
     body: JSON.stringify(commitBody),
@@ -485,7 +485,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
 
   if (latestCommitSha) {
     // Update existing ref
-    const updateRes = await fetch(`${apiBase}/git/refs/heads/${branch}`, {
+    const updateRes = await arcFetch(`${apiBase}/git/refs/heads/${branch}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ sha: commitData.sha, force }),
@@ -497,7 +497,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
   } else {
     // Create new ref (first commit to the repo)
     console.log(`[GitHub Service] Creating initial reference for branch '${branch}'...`);
-    const createRes = await fetch(`${apiBase}/git/refs`, {
+    const createRes = await arcFetch(`${apiBase}/git/refs`, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -512,7 +512,7 @@ export const pushFilesToRepo = async (token, owner, repo, files, message = "Push
       // If reference already exists (rare race condition), try to PATCH it instead
       if (detail?.includes("already exists") || createRes.status === 422) {
         console.log(`[GitHub Service] Branch '${branch}' already exists. Attempting PATCH instead.`);
-        const patchRes = await fetch(`${apiBase}/git/refs/heads/${branch}`, {
+        const patchRes = await arcFetch(`${apiBase}/git/refs/heads/${branch}`, {
           method: "PATCH",
           headers,
           body: JSON.stringify({ sha: commitData.sha, force }),

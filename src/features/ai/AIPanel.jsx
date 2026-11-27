@@ -6,6 +6,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import "../../styles/ai.css";
 import { streamChatWithAI } from "../../services/ai";
+import { scopedStorageKey } from "../../services/arcSession";
 
 const MIN_WIDTH = 300;
 const MAX_WIDTH = 800;
@@ -89,14 +90,14 @@ const AIMessage = memo(({ text, sender }) => {
 
 const AIPanel = ({ isOpen, onClose }) => {
   const [width, setWidth] = useState(() => {
-    const saved = localStorage.getItem("ai_panel_width_v2");
+    const saved = localStorage.getItem(scopedStorageKey("ai_panel_width_v2"));
     return saved ? parseInt(saved, 10) : 400;
   });
   const [isResizing, setIsResizing] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem("ai_chat_history");
+    const saved = localStorage.getItem(scopedStorageKey("ai_chat_history"));
     try {
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
@@ -154,7 +155,7 @@ const AIPanel = ({ isOpen, onClose }) => {
     const handleMouseUp = () => {
       if (isResizing) {
         setIsResizing(false);
-        localStorage.setItem("ai_panel_width_v2", width);
+      localStorage.setItem(scopedStorageKey("ai_panel_width_v2"), width);
       }
     };
 
@@ -210,7 +211,7 @@ const AIPanel = ({ isOpen, onClose }) => {
   useEffect(() => {
     const delay = isLoading ? 1500 : 300; // Save less frequently during stream
     const timeoutId = setTimeout(() => {
-      localStorage.setItem("ai_chat_history", JSON.stringify(messages));
+      localStorage.setItem(scopedStorageKey("ai_chat_history"), JSON.stringify(messages));
     }, delay);
     
     return () => clearTimeout(timeoutId);

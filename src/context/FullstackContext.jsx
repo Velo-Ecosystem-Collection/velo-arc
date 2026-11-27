@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import * as vercel from "../services/vercelService";
 import { getVercelSession, disconnectVercel } from "../services/backendService";
+import { scopedStorageKey } from "../services/arcSession";
 import {
   collectFrontendFiles,
   detectFrontendRoot,
@@ -20,14 +21,14 @@ const PROJECT_KEY = "soroban:vercel_project_id";
 
 const persistTeam = (teamId) => {
   try {
-    if (teamId) localStorage.setItem(TEAM_KEY, teamId);
-    else localStorage.removeItem(TEAM_KEY);
+    if (teamId) localStorage.setItem(scopedStorageKey(TEAM_KEY), teamId);
+    else localStorage.removeItem(scopedStorageKey(TEAM_KEY));
   } catch { /* ignore */ }
 };
 const persistProject = (projectId) => {
   try {
-    if (projectId) localStorage.setItem(PROJECT_KEY, projectId);
-    else localStorage.removeItem(PROJECT_KEY);
+    if (projectId) localStorage.setItem(scopedStorageKey(PROJECT_KEY), projectId);
+    else localStorage.removeItem(scopedStorageKey(PROJECT_KEY));
   } catch { /* ignore */ }
 };
 
@@ -36,12 +37,12 @@ export const FullstackProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState(() => {
-    try { return localStorage.getItem(TEAM_KEY) || ""; } catch { return ""; }
+    try { return localStorage.getItem(scopedStorageKey(TEAM_KEY)) || ""; } catch { return ""; }
   });
 
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState(() => {
-    try { return localStorage.getItem(PROJECT_KEY) || ""; } catch { return ""; }
+    try { return localStorage.getItem(scopedStorageKey(PROJECT_KEY)) || ""; } catch { return ""; }
   });
 
   const [deployments, setDeployments] = useState([]);
