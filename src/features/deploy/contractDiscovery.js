@@ -6,11 +6,11 @@
  * is the full path including the workspace root folder name
  * (e.g. `hello-world/contracts/hello-world/Cargo.toml`).
  *
- * The backend (soroban-ide-runner) receives files with the root folder
+ * The backend receives files with the root folder
  * stripped — see `collectProjectFiles` in `services/backendService.js`.
  * This module emits contract paths using the same "no root" convention so
  * they can be passed straight to `stellar contract build --manifest-path`
- * and to the Docker-mounted `/app/...` wasm path.
+ * and used to resolve the resulting artifact in the runner's workspace.
  */
 
 const IGNORE_DIRS = new Set([
@@ -26,7 +26,7 @@ const IGNORE_DIRS = new Set([
 ]);
 
 const WASM_TARGET_TRIPLE = "wasm32v1-none";
-const MOUNT_PREFIX = "/app";
+const MOUNT_PREFIX = "/workspace";
 
 /**
  * Parse `name = "..."` from the `[package]` section of a `Cargo.toml` string.
@@ -182,17 +182,9 @@ function rootPrefixFor(cargoTomlId, path) {
  * Resolve the on-disk wasm path the backend will produce after
  * `stellar contract build --manifest-path <path>/Cargo.toml`.
  *
- * The soroban-ide-runner container sets `CARGO_TARGET_DIR=/app/target`
- * globally in its Dockerfile, which forces cargo to write every build
- * artifact — for every contract in every workspace — into the single
- * shared `/app/target/` directory. So the resolved wasm path is always:
- *
- *   <mountPrefix>/target/<targetTriple>/release/<crateName>.wasm
- *
- * We keep `fileContents` in the signature for forward compatibility with
- * a future runner that doesn't override CARGO_TARGET_DIR, where we'd
- * need to detect workspace roots vs standalone contracts to pick the
- * right per-crate target/.
+ * The backend mounts the session at `/workspace` and sets
+ * `CARGO_TARGET_DIR=/workspace/target` for each job. The absolute path
+ * stays valid across build and deploy jobs, including for nested crates.
  */
 export function resolveWasmPath(selectedContract, _fileContents = {}, options = {}) {
   if (!selectedContract || !selectedContract.crateName) return null;
