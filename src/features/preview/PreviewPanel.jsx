@@ -22,6 +22,7 @@ import {
 import { detectFrontendRoot } from "../fullstack/fullstackBundler";
 import { downloadFrontendZip } from "./downloadFrontend";
 import { watchLocalServer } from "../../services/localServerProbe";
+import { scopedStorageKey } from "../../services/arcSession";
 import { bundleFrontendInBrowser } from "../../services/inBrowserBundler";
 import { useContract } from "../../context/ContractContext";
 import { useDeploy } from "../../context/DeployContext";
@@ -64,15 +65,15 @@ const PreviewPanel = ({ treeData, fileContents, isActive = true }) => {
 
   // "in-ide" — bundle in the browser (default) | "external" — localhost dev server
   const [localMode, setLocalMode] = useState(() => {
-    try { return localStorage.getItem(LOCAL_MODE_KEY) || "in-ide"; }
+    try { return localStorage.getItem(scopedStorageKey(LOCAL_MODE_KEY)) || "in-ide"; }
     catch { return "in-ide"; }
   });
   useEffect(() => {
-    try { localStorage.setItem(LOCAL_MODE_KEY, localMode); } catch { /* ignore */ }
+    try { localStorage.setItem(scopedStorageKey(LOCAL_MODE_KEY), localMode); } catch { /* ignore */ }
   }, [localMode]);
 
   const [localUrl, setLocalUrl] = useState(() => {
-    try { return localStorage.getItem(LAST_LOCAL_URL_KEY) || DEFAULT_LOCAL_URL; }
+    try { return localStorage.getItem(scopedStorageKey(LAST_LOCAL_URL_KEY)) || DEFAULT_LOCAL_URL; }
     catch { return DEFAULT_LOCAL_URL; }
   });
 
@@ -86,7 +87,7 @@ const PreviewPanel = ({ treeData, fileContents, isActive = true }) => {
   // phase: "idle" | "building" | "ready" | "error"
   const [buildState, setBuildState] = useState({ phase: "idle" });
   const [autoLive, setAutoLive] = useState(() => {
-    try { return localStorage.getItem(AUTO_LIVE_KEY) !== "false"; }
+    try { return localStorage.getItem(scopedStorageKey(AUTO_LIVE_KEY)) !== "false"; }
     catch { return true; }
   });
   const [hintsOpen, setHintsOpen] = useState(false);
@@ -101,13 +102,13 @@ const PreviewPanel = ({ treeData, fileContents, isActive = true }) => {
   );
 
   useEffect(() => {
-    try { localStorage.setItem(AUTO_LIVE_KEY, autoLive ? "true" : "false"); }
+    try { localStorage.setItem(scopedStorageKey(AUTO_LIVE_KEY), autoLive ? "true" : "false"); }
     catch { /* ignore */ }
   }, [autoLive]);
 
   // ─── Persistence + cross-tab sync ─────────────────────────────────────
   useEffect(() => {
-    try { localStorage.setItem(LAST_LOCAL_URL_KEY, localUrl); } catch { /* ignore */ }
+    try { localStorage.setItem(scopedStorageKey(LAST_LOCAL_URL_KEY), localUrl); } catch { /* ignore */ }
   }, [localUrl]);
 
   // ─── Bundle action ────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 // Deploy history: multi-contract, multi-deploy ledger persisted in localStorage.
+import { scopedStorageKey } from "../../services/arcSession";
 //
 // Each contract folder (e.g. "learning/hello-world") owns a bucket of
 // deployment records, sorted newest-first. The most recent deployment in
@@ -15,7 +16,7 @@ export const HISTORY_KEY = "soroban_deployment_history";
 /** Load the history object. Always returns a plain object, never throws. */
 export function loadHistory() {
   try {
-    const raw = localStorage.getItem(HISTORY_KEY);
+    const raw = localStorage.getItem(scopedStorageKey(HISTORY_KEY));
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" ? parsed : {};
@@ -27,7 +28,7 @@ export function loadHistory() {
 /** Persist the full history object. Silently ignores quota errors. */
 export function saveHistory(history) {
   try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history || {}));
+    localStorage.setItem(scopedStorageKey(HISTORY_KEY), JSON.stringify(history || {}));
   } catch {
     /* out of quota — drop silently */
   }

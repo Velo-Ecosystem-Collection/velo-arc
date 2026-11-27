@@ -7,13 +7,13 @@
  * - GET  /api/files  → lazy-load folder contents
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+import { API_BASE, arcFetch, getArcSessionId, isArcEventMode } from "./arcSession";
 
 /**
  * Fetch a full project template (tree + contents) from the backend filesystem.
  */
 export const fetchTemplate = async (name) => {
-  const response = await fetch(`${API_BASE}/templates?name=${name}`);
+  const response = await arcFetch(`${API_BASE}/templates?name=${encodeURIComponent(name)}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch template: ${response.statusText}`);
   }
@@ -26,6 +26,11 @@ export const fetchTemplate = async (name) => {
  * even when frontend and backend are on different domains (cross-origin).
  */
 export const getSessionId = () => {
+  if (isArcEventMode) {
+    const sessionId = getArcSessionId();
+    if (!sessionId) throw new Error("Open this Velo Arc workspace from Velo first.");
+    return sessionId;
+  }
   let sid = localStorage.getItem("workspace_session_id");
   if (!sid) {
     sid = crypto.randomUUID();
@@ -38,6 +43,7 @@ export const getSessionId = () => {
  * Reset the session ID (e.g., when creating a brand new project from scratch).
  */
 export const resetSessionId = () => {
+  if (isArcEventMode) return;
   localStorage.removeItem("workspace_session_id");
 };
 
@@ -100,7 +106,7 @@ export const collectProjectFiles = (treeData, fileContents, options = {}) => {
  */
 export const submitCommand = async (files, command, cwd = "~/project") => {
   const sessionId = getSessionId();
-  const response = await fetch(`${API_BASE}/run`, {
+  const response = await arcFetch(`${API_BASE}/run`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -137,7 +143,7 @@ export const killCommand = async (sessionId, jobId) => {
   if (!sessionId || !jobId) return;
 
   try {
-    const response = await fetch(`${API_BASE}/kill`, {
+    const response = await arcFetch(`${API_BASE}/kill`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -166,21 +172,21 @@ export const submitBuild = (files) => submitCommand(files, "stellar contract bui
 
 /** POST /api/wallet/default/init — create + fund default testnet account */
 export const initDefaultWallet = async () => {
-  const res = await fetch(`${API_BASE}/wallet/default/init`, { method: "POST" });
+  const res = await arcFetch(`${API_BASE}/wallet/default/init`, { method: "POST" });
   if (!res.ok) throw new Error((await res.json()).error || "Wallet init failed");
   return res.json();
 };
 
 /** GET /api/wallet/default/status */
 export const getDefaultWalletStatus = async () => {
-  const res = await fetch(`${API_BASE}/wallet/default/status`);
+  const res = await arcFetch(`${API_BASE}/wallet/default/status`);
   if (!res.ok) throw new Error("Failed to fetch wallet status");
   return res.json();
 };
 
 /** POST /api/wallet/freighter/register — register Freighter public key as named identity */
 export const registerFreighterWallet = async (address) => {
-  const res = await fetch(`${API_BASE}/wallet/freighter/register`, {
+  const res = await arcFetch(`${API_BASE}/wallet/freighter/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ address }),
@@ -198,14 +204,14 @@ export const registerFreighterWallet = async (address) => {
 
 /** POST /api/vercel/oauth/start — returns the authorize URL + a state token. */
 export const startVercelOAuth = async () => {
-  const res = await fetch(`${API_BASE}/vercel/oauth/start`, { method: "POST" });
+  const res = await arcFetch(`${API_BASE}/vercel/oauth/start`, { method: "POST" });
   if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || "Could not start Vercel OAuth");
   return res.json(); // { authorizeUrl, state }
 };
 
 /** GET /api/vercel/oauth/me — fetch the current session's Vercel token + user. */
 export const getVercelSession = async () => {
-  const res = await fetch(`${API_BASE}/vercel/oauth/me`, { credentials: "include" });
+  const res = await arcFetch(`${API_BASE}/vercel/oauth/me`, { credentials: "include" });
   if (res.status === 404 || res.status === 401) return null;
   if (!res.ok) throw new Error("Failed to read Vercel session");
   return res.json(); // { accessToken, user, teamId? }
@@ -214,7 +220,7 @@ export const getVercelSession = async () => {
 /** POST /api/vercel/oauth/disconnect — server-side revoke + clear session cookie. */
 export const disconnectVercel = async () => {
   try {
-    await fetch(`${API_BASE}/vercel/oauth/disconnect`, { method: "POST", credentials: "include" });
+    await arcFetch(`${API_BASE}/vercel/oauth/disconnect`, { method: "POST", credentials: "include" });
   } catch { /* best-effort */ }
 };
 
@@ -227,7 +233,7 @@ export const disconnectVercel = async () => {
  * and you get a mashup of unrelated functions.
  */
 export const getContractInterface = async (files, contractPath = "") => {
-  const res = await fetch(`${API_BASE}/contract/interface`, {
+  const res = await arcFetch(`${API_BASE}/contract/interface`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files, contract_path: contractPath }),
@@ -241,7 +247,7 @@ export const getContractInterface = async (files, contractPath = "") => {
 /** POST /api/validate/project */
 export const validateProject = async (files, category = "ec-level", repoName = "", options = {}) => {
   const { deployed_contract_link: deployedContractLink = "" } = options;
-  const res = await fetch(`${API_BASE}/validate/project`, {
+  const res = await arcFetch(`${API_BASE}/validate/project`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -266,65 +272,58 @@ export const validateProject = async (files, category = "ec-level", repoName = "
  * @returns {function} cleanup — call to close the WebSocket
  */
 export const connectBuildStream = (sessionId, jobId, { onMessage, onError, onDone, onClose }) => {
-  let wsUrl;
-  const queryParams = `?session_id=${sessionId}${jobId ? `&job_id=${jobId}` : ""}`;
-  
-  if (API_BASE.startsWith("http")) {
-    wsUrl = API_BASE.replace(/^http/, "ws") + `/ws${queryParams}`;
-  } else {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    wsUrl = `${protocol}//${window.location.host}${API_BASE}/ws${queryParams}`;
-  }
+	let ws = null;
+	let cancelled = false;
 
-  const ws = new WebSocket(wsUrl);
+	const openSocket = async () => {
+		let ticket = null;
+		if (isArcEventMode) {
+			const response = await arcFetch(`${API_BASE}/ws/ticket`, { method: "POST" });
+			if (!response.ok) throw new Error("Could not authorize the build output stream.");
+			ticket = (await response.json()).ticket;
+		}
+		if (cancelled) return;
 
-  ws.onopen = () => {
-    // Silent connect - no message
-  };
+		const query = new URLSearchParams();
+		if (isArcEventMode) query.set("ticket", ticket);
+		else query.set("session_id", sessionId);
+		if (jobId) query.set("job_id", jobId);
+		const queryParams = `?${query.toString()}`;
+		let wsUrl;
+		if (API_BASE.startsWith("http")) {
+			wsUrl = API_BASE.replace(/^http/, "ws") + `/ws${queryParams}`;
+		} else {
+			const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+			wsUrl = `${protocol}//${window.location.host}${API_BASE}/ws${queryParams}`;
+		}
 
-  ws.onmessage = (event) => {
-    try {
-      const msg = JSON.parse(event.data);
+		ws = new WebSocket(wsUrl);
+		ws.onmessage = (event) => {
+			try {
+				const msg = JSON.parse(event.data);
+				if (jobId && msg.job_id && msg.job_id !== jobId) return;
+				if (msg.type === "done") {
+					onDone();
+					ws.close();
+					return;
+				}
+				onMessage(msg);
+			} catch {
+				onMessage({ type: "stdout", content: event.data });
+			}
+		};
+		ws.onerror = () => onError?.("WebSocket connection error");
+		ws.onclose = (event) => {
+			if (!event.wasClean) onError?.("Connection to build server lost");
+			else onClose?.();
+		};
+	};
 
-      // FILTER: Only process messages belonging to THIS job.
-      // This prevents init output from appearing in the terminal during build,
-      // and vice versa.
-      if (jobId && msg.job_id && msg.job_id !== jobId) {
-        return; // Silently ignore messages from other jobs
-      }
-
-      // "done" signal means command is complete
-      if (msg.type === "done") {
-        onDone();
-        ws.close();
-        return;
-      }
-
-      onMessage(msg);
-    } catch {
-      // If not JSON, treat as raw text
-      onMessage({ type: "stdout", content: event.data });
-    }
-  };
-
-  ws.onerror = () => {
-    onError("WebSocket connection error");
-  };
-
-  ws.onclose = (event) => {
-    if (!event.wasClean) {
-      onError("Connection to build server lost");
-    } else if (onClose) {
-      onClose(); // Call onClose when connection closes cleanly (command finished)
-    }
-  };
-
-  // Return cleanup function
-  return () => {
-    if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-      ws.close();
-    }
-  };
+	openSocket().catch((error) => onError?.(error.message || "Could not open build output."));
+	return () => {
+		cancelled = true;
+		if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) ws.close();
+	};
 };
 
 

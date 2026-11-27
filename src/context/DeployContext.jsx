@@ -8,20 +8,21 @@ import {
   promoteToActive as promoteToActivePure,
   togglePinned as togglePinnedPure,
 } from "../features/deploy/deploymentHistory";
+import { scopedStorageKey } from "../services/arcSession";
 
 const DeployContext = createContext(null);
 
 const STORAGE_KEY = "soroban_deploy_state";
 
 const load = () => {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem(scopedStorageKey(STORAGE_KEY))) || {}; } catch { return {}; }
 };
 
 // Transient statuses like "running" must never be restored on reload —
 // the backend job that flipped the status to "running" is long gone once
 // the page reloads, so we'd be stuck forever waiting for a completion event
 // that can't arrive.
-const sanitizeStatus = (s) => (s === "running" ? null : s || null);
+const sanitizeStatus = (s) => (["running", "queued"].includes(s) ? null : s || null);
 
 export const DeployProvider = ({ children }) => {
   const saved = load();
@@ -39,7 +40,7 @@ export const DeployProvider = ({ children }) => {
   // null in place of "running" so an interrupted build (runner restart, tab
   // close) doesn't leave the panel wedged in the RUNNING badge forever.
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    localStorage.setItem(scopedStorageKey(STORAGE_KEY), JSON.stringify({
       compileStatus: compileStatus === "running" ? null : compileStatus,
       deployStatus: deployStatus === "running" ? null : deployStatus,
     }));

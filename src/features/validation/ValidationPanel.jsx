@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { ShieldCheck, ShieldX, AlertTriangle, CheckCircle, XCircle, Loader, ChevronDown, ChevronRight, Link2 } from "lucide-react";
 import { useDeploy } from "../../context/DeployContext";
+import { scopedStorageKey } from "../../services/arcSession";
 import { validateProject, collectProjectFiles } from "../../services/backendService";
 import {
   buildDeployedContractChecks,
@@ -80,7 +81,7 @@ const ValidationPanel = ({ treeData, fileContents }) => {
   const [error, setError] = useState(null);
   const [deployedContractLink, setDeployedContractLink] = useState(() => {
     try {
-      return sessionStorage.getItem(DEPLOY_LINK_STORAGE) || "";
+      return sessionStorage.getItem(scopedStorageKey(DEPLOY_LINK_STORAGE)) || "";
     } catch {
       return "";
     }
@@ -91,7 +92,7 @@ const ValidationPanel = ({ treeData, fileContents }) => {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(DEPLOY_LINK_STORAGE, deployedContractLink);
+      sessionStorage.setItem(scopedStorageKey(DEPLOY_LINK_STORAGE), deployedContractLink);
     } catch {
       /* ignore */
     }

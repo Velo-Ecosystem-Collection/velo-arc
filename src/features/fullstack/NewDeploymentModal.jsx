@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { X, Folder, Loader, Rocket, Plus, AlertTriangle, CheckCircle, ExternalLink } from "lucide-react";
 import { useFullstack } from "../../context/FullstackContext";
 import { detectFrontendRoot, listDeployableSubfolders } from "./fullstackBundler";
+import { scopedStorageKey } from "../../services/arcSession";
 
 const MAX_ENV_ROWS = 30;
 const LAST_VERCEL_URL_KEY = "soroban.lastVercelUrl";
@@ -43,7 +44,7 @@ const NewDeploymentModal = ({ treeData, fileContents, initialEnvRows, onClose, o
   useEffect(() => {
     if (deployFlow?.stage === "done" && deployFlow?.deploymentUrl) {
       try {
-        localStorage.setItem(LAST_VERCEL_URL_KEY, deployFlow.deploymentUrl);
+        localStorage.setItem(scopedStorageKey(LAST_VERCEL_URL_KEY), deployFlow.deploymentUrl);
         // Same-tab notifier — `storage` events only fire across tabs.
         window.dispatchEvent(new CustomEvent("soroban:vercelDeployUrl", {
           detail: { url: deployFlow.deploymentUrl },
