@@ -398,7 +398,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
 
   // ─── Deploy → stream to Terminal ─────────────────────────────────────────
 
-  const handleDeploy = useCallback(async () => {
+  const handleDeploy = async () => {
     if (compileStatus !== "success") return;
     // Only warn if the *currently selected* contract already has an active
     // deployment. Deploying a different contract for the first time should
@@ -408,7 +408,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       return;
     }
     await executeDeploy();
-  }, [compileStatus, activeForSelected]);
+  };
 
   const executeDeploy = useCallback(async () => {
     if (!selectedContract) return;
@@ -418,6 +418,11 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
       window.dispatchEvent(new CustomEvent("soroban:terminalAppend", {
         detail: { type: "error", content: "Connect an external wallet before deploying." }
       }));
+      return;
+    }
+    if (walletProviderId === "noir" && effectiveDeployNetwork !== "testnet") {
+      setDeployStatus("error");
+      toast.error("Select Testnet to deploy with Noir.");
       return;
     }
     setDeployStatus("running");
@@ -904,6 +909,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
           <div className="deploy-subsection-label">External Wallet</div>
           <select
             className="deploy-input"
+            aria-label="External wallet"
             value={walletProviderId}
             onChange={(e) => setWalletProviderId(e.target.value)}
             disabled={!!walletAddress}
@@ -938,7 +944,6 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
                   <span className="deploy-balance-unit">XLM</span>
                 </div>
               )}
-              {walletConnectError && <div className="deploy-error">{errString(walletConnectError)}</div>}
             </div>
           ) : (
             <>
@@ -950,6 +955,7 @@ const DeployPanel = ({ treeData, fileContents, setFileContents }) => {
               </div>
             </>
           )}
+          {walletConnectError && <div className="deploy-error" role="status">{errString(walletConnectError)}</div>}
         </div>
       </Section>
 

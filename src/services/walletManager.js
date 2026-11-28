@@ -5,22 +5,53 @@ import {
   getFreighterNetwork,
   connectFreighter,
   signFreighterTransaction,
-} from "./freighter";
+} from "./freighter.js";
+import { StrKey } from "@stellar/stellar-base";
 
 /**
  * Unified wallet script for Stellar wallet providers.
- * Freighter remains fully supported, and other providers can be enabled via
- * Stellar Wallets SDK without rewriting caller code.
+ * Freighter and Noir use their browser extension APIs. The remaining entries
+ * use Stellar Wallets Kit when it is available.
  */
 
 export const WALLET_PROVIDERS = [
   { id: "freighter", label: "Freighter", type: "extension" },
+  { id: "noir", label: "Noir", type: "extension" },
   { id: "xbull", label: "xBull", type: "extension" },
   { id: "albedo", label: "Albedo", type: "web" },
   { id: "lobstr", label: "LOBSTR", type: "web" },
 ];
 
 const SDK_PACKAGE = "@creit.tech/stellar-wallets-kit";
+
+function requireNoir() {
+  const provider = globalThis.window?.noir?.stellar;
+  if (provider?.isNoir !== true) {
+    throw new Error("Install or enable the Noir browser extension to connect.");
+  }
+  return provider;
+}
+
+function unwrapNoir(response) {
+  if (!response || typeof response !== "object" || Array.isArray(response)) {
+    throw new Error("Noir returned an invalid response.");
+  }
+  if ("error" in response) {
+    throw new Error(
+      typeof response.error?.message === "string" && response.error.message
+        ? response.error.message
+        : "Noir could not complete the request.",
+    );
+  }
+  return response;
+}
+
+async function requireNoirTestnet(provider) {
+  const { networkPassphrase } = unwrapNoir(await provider.getNetwork());
+  if (networkPassphrase !== TESTNET_PASSPHRASE) {
+    throw new Error("Switch Noir to Testnet, then reconnect.");
+  }
+}
 
 const normalizeNetwork = (network, passphrase) => {
   if (passphrase === TESTNET_PASSPHRASE) return "testnet";
@@ -46,6 +77,22 @@ async function loadWalletSdk() {
  * Returns a normalized payload that callers can store safely in state.
  */
 export async function connectStellarWallet(providerId = "freighter") {
+  if (providerId === "noir") {
+    const provider = requireNoir();
+    const { address } = unwrapNoir(await provider.requestAccess());
+    if (typeof address !== "string" || !StrKey.isValidEd25519PublicKey(address)) {
+      throw new Error("Noir returned an invalid Stellar account ID.");
+    }
+    await requireNoirTestnet(provider);
+    return {
+      providerId,
+      address,
+      network: "testnet",
+      networkPassphrase: TESTNET_PASSPHRASE,
+      wrongNetwork: false,
+    };
+  }
+
   if (providerId === "freighter") {
     const r = await connectFreighter();
     if (r?.error) throw new Error(r.error);
@@ -132,6 +179,28 @@ export async function signWithWallet(assembledXdr, walletState) {
   const providerId = walletState?.providerId || "freighter";
   if (providerId === "freighter") {
     return signFreighterTransaction(assembledXdr, walletState?.address);
+  }
+
+  if (providerId === "noir") {
+    const { address, networkPassphrase } = walletState;
+    if (typeof address !== "string" || !StrKey.isValidEd25519PublicKey(address)) {
+      throw new Error("Reconnect Noir before signing.");
+    }
+    if (networkPassphrase !== TESTNET_PASSPHRASE) {
+      throw new Error("Switch Noir to Testnet, then reconnect.");
+    }
+    const provider = requireNoir();
+    await requireNoirTestnet(provider);
+    const { signedTxXdr, signerAddress } = unwrapNoir(
+      await provider.signTransaction(assembledXdr, { address, networkPassphrase }),
+    );
+    if (signerAddress !== address) {
+      throw new Error("The Noir account changed before signing completed. Reconnect to continue.");
+    }
+    if (typeof signedTxXdr !== "string" || !signedTxXdr.trim()) {
+      throw new Error("Noir did not return a signed transaction.");
+    }
+    return signedTxXdr;
   }
 
   const kit = walletState?.client;

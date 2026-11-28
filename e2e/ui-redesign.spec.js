@@ -69,3 +69,37 @@ test("Sonner reports a GitHub clone error", async ({ page }) => {
   const notifications = page.getByRole("region", { name: "Notifications alt+T" });
   await expect(notifications.getByText("Invalid GitHub URL. Please use format: https://github.com/owner/repo", { exact: true })).toBeVisible();
 });
+
+test("the Deploy wallet selector connects Noir on Testnet", async ({ page }) => {
+  const address = "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
+  await page.evaluate((address) => {
+    window.noir = {
+      stellar: {
+        isNoir: true,
+        requestAccess: async () => ({ address }),
+        getNetwork: async () => ({
+          networkPassphrase: sessionStorage.getItem("noir-testnet")
+            ? "Test SDF Network ; September 2015"
+            : "Public Global Stellar Network ; September 2015",
+        }),
+      },
+    };
+  }, address);
+  await page.route("https://horizon-testnet.stellar.org/accounts/**", (route) =>
+    route.fulfill({ json: { balances: [] } }),
+  );
+
+  await page.getByRole("navigation", { name: "IDE panels" })
+    .getByRole("button", { name: "Deploy", exact: true }).click();
+  await page.getByRole("button", { name: "Wallet", exact: true }).click();
+  const selector = page.getByRole("combobox", { name: "External wallet" });
+  await selector.selectOption({ label: "Noir" });
+  const connect = page.getByRole("button", { name: "Connect Noir", exact: true });
+  await connect.click();
+  await expect(page.getByText("Switch Noir to Testnet, then reconnect.")).toBeVisible();
+
+  await page.evaluate(() => sessionStorage.setItem("noir-testnet", "1"));
+  await connect.click();
+  await expect(selector).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Disconnect" })).toBeVisible();
+});

@@ -1,11 +1,13 @@
-import {
+import freighterApi from "@stellar/freighter-api";
+import { Transaction, TransactionBuilder, Networks, xdr as StellarXdr, StrKey } from "@stellar/stellar-base";
+
+const {
   isConnected,
   getAddress,
   requestAccess,
   getNetwork,
   signTransaction,
-} from "@stellar/freighter-api";
-import { Transaction, TransactionBuilder, Networks, xdr as StellarXdr, StrKey } from "@stellar/stellar-base";
+} = freighterApi;
 
 export const TESTNET_PASSPHRASE = "Test SDF Network ; September 2015";
 
@@ -145,7 +147,7 @@ async function getAccountSequence(address) {
 
   const accountResp = await fetch(`https://horizon-testnet.stellar.org/accounts/${address}`);
   if (!accountResp.ok) {
-    throw new Error("Freighter account not found on testnet. Fund it first via Friendbot.");
+    throw new Error("Wallet account not found on Testnet. Fund it first via Friendbot.");
   }
   const { sequence } = await accountResp.json();
   return BigInt(sequence);
@@ -214,7 +216,7 @@ const _signAndSubmitOnce = async (assembledXdr, walletAddress, allowRetry, signe
   } catch (e) {
     // User rejected, locked extension, etc. — preserve the raw message but
     // tag it so the caller can label it accurately.
-    const err = new Error(`Freighter sign rejected: ${e.message}`);
+    const err = new Error(`Wallet signing failed: ${e.message}`);
     err.stage = "sign";
     throw err;
   }

@@ -74,7 +74,7 @@ Build, test, and deploy Rust smart contracts on the Stellar network — without 
 - **Deploy timeline (multi-contract history)** — grouped deploy history with timestamps, active/previous states, inline Explorer links, and one-click re-activate.
 - **Deploy timeline controls** — search by alias/ID/path, filter by wallet/network/contract, pin favorites, and compare deployment diffs (metadata + function set).
 - **Inline contract testing from deploy history** — invoke read/write functions directly from each deployed contract card.
-- **Freighter wallet integration** — connect, deploy with Freighter signing flow, and interact with deployed contracts.
+- **Stellar wallet integration** — select Freighter or [Noir](https://chromewebstore.google.com/detail/noir/gikfhchijjljpbhokmdmaadgmpbchmjl) in Deploy → Wallet and approve deployment signatures in your Testnet wallet. Event workspaces require the same account used to open Arc.
 - **Improved Freighter diagnostics** — clearer sign/submit/on-chain error stages with decoded transaction result codes.
 - **Command Palette & Quick Open** — `Cmd/Ctrl+Shift+P` and `Cmd/Ctrl+P`.
 - **Built-in tutorials** to guide new Soroban developers end-to-end.

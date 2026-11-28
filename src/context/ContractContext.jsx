@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { connectStellarWallet, getConnectedWallet, WALLET_PROVIDERS } from "../services/walletManager";
 import { registerFreighterWallet } from "../services/backendService";
 import { getPreviewContract, loadHistory } from "../features/deploy/deploymentHistory";
@@ -30,15 +30,17 @@ export const ContractProvider = ({ children }) => {
   const [walletClient, setWalletClient] = useState(null);
   const [isInteractActive, setIsInteractActive] = useState(false);
   const [error, setError] = useState(null);
+  const walletConnectMode = useRef("startup");
 
   // Silent check on mount (currently Freighter path).
   useEffect(() => {
+    let mounted = true;
     const checkConnection = async () => {
       try {
         const connected = await getConnectedWallet();
-        if (!connected?.address) return;
+        if (!mounted || walletConnectMode.current !== "startup" || !connected?.address) return;
         if (isArcEventMode && connected.address !== getArcSessionAccount()) {
-          setError("Connect the same Testnet Freighter account you used to open Velo Arc.");
+          setError("Connect the same Testnet account you used to open Velo Arc.");
           return;
         }
         setWalletAddress(connected.address);
@@ -54,6 +56,7 @@ export const ContractProvider = ({ children }) => {
       }
     };
     checkConnection();
+    return () => { mounted = false; };
   }, []);
 
   // Restore the most recent deployed contract so preview/interact panels
@@ -77,22 +80,25 @@ export const ContractProvider = ({ children }) => {
 
 
   const connectWallet = useCallback(async (providerId = walletProviderId) => {
+    if (walletConnectMode.current === "connecting") return null;
+    walletConnectMode.current = "connecting";
+    const selectedProvider = typeof providerId === "string" ? providerId : walletProviderId;
     try {
       setError(null);
-      const { address, network, networkPassphrase, wrongNetwork, client, providerId: connectedProvider } = await connectStellarWallet(providerId);
+      const { address, network, networkPassphrase, wrongNetwork, client, providerId: connectedProvider } = await connectStellarWallet(selectedProvider);
       if (address) {
         if (isArcEventMode && address !== getArcSessionAccount()) {
-          setError("Connect the same Testnet Freighter account you used to open Velo Arc.");
+          setError("Connect the same Testnet account you used to open Velo Arc.");
           return null;
         }
         setWalletAddress(address);
         setWalletNetwork(network || null);
         setWalletNetworkPassphrase(networkPassphrase || null);
-        setWalletProviderId(connectedProvider || providerId);
+        setWalletProviderId(connectedProvider || selectedProvider);
         setWalletClient(client || null);
         // Register public key in runner container so CLI can use it as --source.
         // Backend endpoint is currently Freighter-specific.
-        if ((connectedProvider || providerId) === "freighter") {
+        if ((connectedProvider || selectedProvider) === "freighter") {
           safeRegisterFreighter(address);
         }
         if (wrongNetwork) {
@@ -102,7 +108,9 @@ export const ContractProvider = ({ children }) => {
       }
     } catch (err) {
       setError(err.message);
-      throw err;
+      return null;
+    } finally {
+      walletConnectMode.current = "manual";
     }
   }, [walletProviderId]);
 
@@ -111,6 +119,7 @@ export const ContractProvider = ({ children }) => {
     setWalletNetwork(null);
     setWalletNetworkPassphrase(null);
     setWalletClient(null);
+    setError(null);
   }, []);
 
   const value = {
