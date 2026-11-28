@@ -8,12 +8,12 @@
  *     so rate limits go from 60/hr anonymous to 5,000/hr authenticated.
  *   - Downloads the repository as one authenticated zipball whenever possible,
  *     avoiding one network request per file.
- *   - Falls back to the Git Trees + raw-file path if archive downloads are not
- *     available in the current browser/proxy environment.
+ *   - Falls back to Git Trees and individual file downloads when archives
+ *     are unavailable, using the Git Blobs API for private files and raw download failures.
  *   - Limits concurrent fallback file downloads so we don't starve the browser.
  */
 
-import { getStoredToken } from "./githubAuthService";
+import { getStoredToken } from "./githubAuthService.js";
 
 const GITHUB_API_BASE = "https://api.github.com";
 const RAW_BASE = "https://raw.githubusercontent.com";
@@ -61,9 +61,9 @@ export const parseGithubUrl = (url) => {
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────
 
-const buildHeaders = () => {
+const buildHeaders = (accept = "application/vnd.github+json") => {
   const headers = {
-    Accept: "application/vnd.github+json",
+    Accept: accept,
     "X-GitHub-Api-Version": "2022-11-28",
   };
   const token = getStoredToken();
@@ -91,8 +91,8 @@ const formatRateLimitError = (response) => {
   return `GitHub API rate limit exceeded.${suffix}`;
 };
 
-const githubFetch = async (url) => {
-  const response = await fetch(url, { headers: buildHeaders() });
+const githubFetch = async (url, accept) => {
+  const response = await fetch(url, { headers: buildHeaders(accept) });
   if (response.ok) return response;
 
   if (response.status === 403 || response.status === 429) {
@@ -132,6 +132,11 @@ const isBinaryFile = (filename) => {
   return BINARY_EXTENSIONS.has(ext);
 };
 
+const readFileContent = async (response, isBinary) => {
+  if (!isBinary) return response.text();
+  return bytesToBase64(new Uint8Array(await response.arrayBuffer()));
+};
+
 export const fetchFileContent = async (downloadUrl, isBinary = false) => {
   const token = getStoredToken();
   const isTrustedRawUrl = typeof downloadUrl === "string" && downloadUrl.startsWith(`${RAW_BASE}/`);
@@ -142,11 +147,13 @@ export const fetchFileContent = async (downloadUrl, isBinary = false) => {
   if (!response.ok) {
     throw new Error(`Failed to fetch file: ${response.statusText}`);
   }
-  if (isBinary) {
-    const buffer = await response.arrayBuffer();
-    return bytesToBase64(new Uint8Array(buffer));
-  }
-  return response.text();
+  return readFileContent(response, isBinary);
+};
+
+const fetchBlobContent = async (owner, repo, sha, isBinary) => {
+  const url = `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/blobs/${encodeURIComponent(sha)}`;
+  const response = await githubFetch(url, "application/vnd.github.raw+json");
+  return readFileContent(response, isBinary);
 };
 
 /**
@@ -300,7 +307,7 @@ const buildTreeFromEntries = (entries) => {
         ...(entry.size !== undefined ? { size: entry.size } : {}),
       };
       parentChildren.push(node);
-      files.push({ node, binary, loadContent: entry.loadContent });
+      files.push({ node, loadContent: entry.loadContent });
     }
     // "commit" entries (submodules) are ignored.
   }
@@ -308,7 +315,7 @@ const buildTreeFromEntries = (entries) => {
   return { nodes: rootChildren, files };
 };
 
-const buildTreeFromFlatList = (entries, owner, repo, ref) => {
+const buildTreeFromFlatList = (entries, owner, repo, ref, privateRepo) => {
   const rawRef = ref
     .split("/")
     .map(encodeURIComponent)
@@ -327,7 +334,16 @@ const buildTreeFromFlatList = (entries, owner, repo, ref) => {
       ...entry,
       binary,
       downloadUrl: rawUrl,
-      loadContent: () => fetchFileContent(rawUrl, binary),
+      loadContent: async () => {
+        if (!privateRepo) {
+          try {
+            return await fetchFileContent(rawUrl, binary);
+          } catch {
+            // Recover the file by its SHA if the raw host is unavailable.
+          }
+        }
+        return fetchBlobContent(owner, repo, entry.sha, binary);
+      },
     };
   });
 
@@ -447,8 +463,7 @@ export const cloneRepository = async (githubUrl, onProgress) => {
     );
     report(70, "Unpacking repository archive...");
   } catch (archiveError) {
-    // Some browser/proxy combinations block the archive redirect. Preserve
-    // the existing tree/raw implementation as a compatibility fallback.
+    // Some browser/proxy combinations block the archive redirect.
     sourceType = "tree";
     console.warn("GitHub archive download unavailable; falling back to file downloads:", archiveError?.message || archiveError);
 
@@ -461,7 +476,7 @@ export const cloneRepository = async (githubUrl, onProgress) => {
     }
 
     report(38, "Building repository file tree...", { force: true, indeterminate: false });
-    workspaceSource = buildTreeFromFlatList(tree.tree || [], owner, repo, defaultBranch);
+    workspaceSource = buildTreeFromFlatList(tree.tree || [], owner, repo, defaultBranch, repoInfo.private);
   }
 
   const { nodes, files } = workspaceSource;
@@ -472,23 +487,22 @@ export const cloneRepository = async (githubUrl, onProgress) => {
     indeterminate: false,
   });
 
-  // Download file contents in parallel with a concurrency cap. Failures on
-  // individual files don't abort the whole clone — we substitute a placeholder
-  // so the user still gets a working workspace and can retry a single file.
-  const contents = {};
   let completedFiles = 0;
-  await parallelMap(files, MAX_FILE_CONCURRENCY, async ({ node, binary, loadContent }) => {
+  let downloadError;
+  const contentEntries = await parallelMap(files, MAX_FILE_CONCURRENCY, async ({ node, loadContent }) => {
+    if (downloadError) return;
     try {
-      contents[node.id] = await loadContent();
-    } catch (err) {
-      console.warn(`Failed to fetch ${node.path}:`, err?.message || err);
-      contents[node.id] = binary ? "" : `// Error loading ${node.name}\n`;
-    } finally {
+      const content = await loadContent();
       completedFiles += 1;
-      const fileRatio = files.length ? completedFiles / files.length : 1;
+      const fileRatio = completedFiles / files.length;
       report(contentStart + fileRatio * (contentEnd - contentStart), `Loading files (${completedFiles}/${files.length})...`);
+      return [node.id, content];
+    } catch (err) {
+      downloadError ??= new Error(`Could not load ${node.path} from GitHub. ${err?.message || err}`, { cause: err });
     }
   });
+  if (downloadError) throw downloadError;
+  const contents = Object.fromEntries(contentEntries);
 
   report(100, "Clone complete.", { force: true, indeterminate: false });
   const rootName = repoInfo.name || repo;
