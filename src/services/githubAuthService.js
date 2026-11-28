@@ -6,7 +6,7 @@
  * to bypass CORS restrictions.
  */
 
-import { API_BASE, arcFetch, scopedStorageKey } from "./arcSession";
+import { API_BASE, arcFetch, scopedStorageKey } from "./arcSession.js";
 
 // ─── Configuration ───────────────────────────────────────────────
 // Replace with your GitHub OAuth App Client ID
